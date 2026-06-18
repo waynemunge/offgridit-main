@@ -8,8 +8,8 @@ export function CompareBar() {
   if (items.length < 1) return null;
 
   return (
-    <div className="fixed bottom-24 left-1/2 z-40 -translate-x-1/2 px-4">
-      <div className="flex items-center gap-3 rounded-2xl border border-border bg-card/95 px-4 py-3 shadow-2xl backdrop-blur-sm">
+    <div className="fixed bottom-24 left-2 right-2 z-40 sm:left-1/2 sm:right-auto sm:-translate-x-1/2">
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card/95 px-3 py-2 shadow-2xl backdrop-blur-sm sm:gap-3 sm:px-4 sm:py-3">
         {items.map((p) => (
           <div key={p.id} className="relative">
             <img
