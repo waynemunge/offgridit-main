@@ -1,11 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
-import { toast } from "sonner";
+import { Clock, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { seo } from "@/lib/site";
+import { PHONE_DISPLAY, WHATSAPP_URL, seo } from "@/lib/site";
 
 export const Route = createFileRoute("/contact")({
   head: () =>
@@ -19,17 +18,29 @@ export const Route = createFileRoute("/contact")({
 });
 
 const INFO = [
-  { icon: Phone, label: "Call us", value: "+254 700 000 000" },
+  { icon: Phone, label: "Call or WhatsApp", value: PHONE_DISPLAY },
   { icon: Mail, label: "Email", value: "hello@offgridit.com" },
   { icon: MapPin, label: "Visit", value: "Nairobi, Kenya" },
   { icon: Clock, label: "Hours", value: "Mon–Sat, 9am–6pm" },
 ];
 
 function Contact() {
-  const submit = (e: React.FormEvent) => {
+  // No message inbox yet: the form opens WhatsApp with the message ready to send,
+  // the same channel used to follow up on orders.
+  const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    toast.success("Message sent! We'll get back to you within 24 hours.");
-    (e.target as HTMLFormElement).reset();
+    const fd = new FormData(e.currentTarget);
+    const name = String(fd.get("name") ?? "").trim();
+    const subject = String(fd.get("subject") ?? "").trim();
+    const message = String(fd.get("message") ?? "").trim();
+    const text = [`Hi OffGridIt, I'm ${name}.`, subject && `Subject: ${subject}`, message]
+      .filter(Boolean)
+      .join("\n\n");
+    window.open(
+      `${WHATSAPP_URL}?text=${encodeURIComponent(text)}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
   };
 
   return (
@@ -47,24 +58,23 @@ function Contact() {
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="cname">Name</Label>
-              <Input id="cname" required />
+              <Input id="cname" name="name" autoComplete="name" maxLength={100} required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cemail">Email</Label>
-              <Input id="cemail" type="email" required />
+              <Label htmlFor="csubject">Subject</Label>
+              <Input id="csubject" name="subject" maxLength={120} placeholder="Optional" />
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="csubject">Subject</Label>
-            <Input id="csubject" required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="cmsg">Message</Label>
-            <Textarea id="cmsg" rows={5} required />
+            <Textarea id="cmsg" name="message" rows={5} maxLength={1500} required />
           </div>
           <Button type="submit" variant="hero" size="lg">
-            Send message
+            <MessageCircle className="h-5 w-5" /> Send on WhatsApp
           </Button>
+          <p className="text-sm text-muted-foreground">
+            Opens WhatsApp with your message ready to send to {PHONE_DISPLAY}.
+          </p>
         </form>
 
         <aside className="space-y-4">

@@ -6,7 +6,9 @@ export const SITE_TAGLINE = "Premium Gadgets & Tech in Kenya";
 export const SITE_DESCRIPTION =
   "Shop genuine phones, laptops, audio, wearables and accessories at OffGridIt. Warranty included, pay with M-Pesa. Order online and we'll call or WhatsApp you to arrange pickup or delivery.";
 
-export const WHATSAPP_NUMBER = "254702699933";
+/** Store phone — WhatsApp and calls. */
+export const WHATSAPP_NUMBER = "254799844180";
+export const PHONE_DISPLAY = "+254 799 844 180";
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
 
 /** How orders are fulfilled — shown wherever shipping used to be mentioned. */
