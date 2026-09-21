@@ -1,0 +1,36 @@
+name: CI
+
+# Runs on every push and pull request. main is protected on GitHub so a
+# change can only be merged once this passes.
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Lint, type check, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      # Build only checks that the site compiles; Vercel does the real deploy.
+      - name: Build
+        run: npm run build

@@ -3,7 +3,10 @@ import type { Product } from "./types";
 const KEY = "offgridit_recently_viewed";
 const MAX = 8;
 
-type RecentItem = Pick<Product, "id" | "name" | "slug" | "brand" | "images" | "price_kes" | "rating">;
+type RecentItem = Pick<
+  Product,
+  "id" | "name" | "slug" | "brand" | "images" | "price_kes" | "rating"
+>;
 
 function load(): RecentItem[] {
   try {
@@ -28,7 +31,9 @@ export function trackProduct(product: Product) {
   const next = [item, ...prev].slice(0, MAX);
   try {
     localStorage.setItem(KEY, JSON.stringify(next));
-  } catch {}
+  } catch {
+    // storage unavailable (private mode)
+  }
 }
 
 export function getRecentlyViewed(excludeId?: string): RecentItem[] {
