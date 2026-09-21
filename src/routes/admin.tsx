@@ -25,15 +25,16 @@ import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recha
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
-import { CATEGORIES, type Product } from "@/lib/types";
+import { CATEGORIES, PRODUCT_STATUSES, type Product, type ProductStatus } from "@/lib/types";
 import { formatKES } from "@/lib/format";
 import { NO_INDEX } from "@/lib/site";
-import { productsQueryOptions } from "@/lib/products";
+import { adminProductsQueryOptions } from "@/lib/products";
 import {
   adminBulkUpdateStock,
   adminDeleteProduct,
   adminGetCustomers,
   adminSaveProduct,
+  adminSetProductStatus,
   adminUpdateOrderNotes,
   adminUpdateOrderStatus,
   ORDER_STATUSES,
@@ -133,6 +134,7 @@ type ProductForm = {
   is_on_sale: boolean;
   sale_ends_at: string;
   specs_raw: string;
+  status: ProductStatus;
 };
 
 const EMPTY_FORM: ProductForm = {
@@ -149,6 +151,20 @@ const EMPTY_FORM: ProductForm = {
   is_on_sale: false,
   sale_ends_at: "",
   specs_raw: "",
+  // New products stay hidden until they're switched to Live.
+  status: "draft",
+};
+
+const PRODUCT_STATUS_STYLES: Record<ProductStatus, string> = {
+  draft: "bg-yellow-500/15 text-yellow-500",
+  active: "bg-success/15 text-success",
+  archived: "bg-muted text-muted-foreground",
+};
+
+const PRODUCT_STATUS_HELP: Record<ProductStatus, string> = {
+  draft: "Hidden from customers while you set it up.",
+  active: "Shown in the store and can be ordered.",
+  archived: "No longer sold. Hidden from customers, kept for your records.",
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -879,7 +895,28 @@ function OrdersPanel() {
 
 function ProductsPanel() {
   const qc = useQueryClient();
-  const { data: products = [], isLoading } = useQuery(productsQueryOptions);
+  const { data: allProducts = [], isLoading } = useQuery(adminProductsQueryOptions);
+  const [statusFilter, setStatusFilter] = useState<ProductStatus | "all">("all");
+  const products =
+    statusFilter === "all" ? allProducts : allProducts.filter((p) => p.status === statusFilter);
+  const [changingStatus, setChangingStatus] = useState<string | null>(null);
+
+  const changeStatus = async (p: Product, status: ProductStatus) => {
+    setChangingStatus(p.id);
+    try {
+      await adminSetProductStatus({ data: { id: p.id, status } });
+      qc.invalidateQueries({ queryKey: ["products"] });
+      toast.success(
+        status === "active"
+          ? `${p.name} is now live in the store`
+          : `${p.name} is now ${status === "draft" ? "a draft" : "archived"} — hidden from customers`,
+      );
+    } catch {
+      toast.error("Failed to change status");
+    } finally {
+      setChangingStatus(null);
+    }
+  };
   const [sheetOpen, setSheetOpen] = useState(false);
   const [form, setForm] = useState<ProductForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
@@ -958,6 +995,7 @@ function ProductsPanel() {
       specs_raw: Object.entries(p.specs)
         .map(([k, v]) => `${k}: ${v}`)
         .join("\n"),
+      status: p.status,
     });
     setSheetOpen(true);
   };
@@ -1002,11 +1040,18 @@ function ProductsPanel() {
           is_featured: form.is_featured,
           is_on_sale: form.is_on_sale,
           sale_ends_at: form.sale_ends_at ? new Date(form.sale_ends_at).toISOString() : null,
+          status: form.status,
         },
       });
       qc.invalidateQueries({ queryKey: ["products"] });
       setSheetOpen(false);
-      toast.success(form.id ? "Product updated" : "Product created");
+      toast.success(
+        form.id
+          ? "Product updated"
+          : form.status === "draft"
+            ? "Draft saved — set it to Live when it's ready"
+            : "Product created",
+      );
     } catch (err) {
       toast.error("Failed to save product");
     } finally {
@@ -1030,13 +1075,32 @@ function ProductsPanel() {
   };
 
   const LOW_STOCK = 5;
-  const outOfStock = products.filter((p) => p.stock === 0).length;
-  const lowStock = products.filter((p) => p.stock > 0 && p.stock <= LOW_STOCK).length;
+  // Stock warnings only matter for products customers can buy.
+  const live = allProducts.filter((p) => p.status === "active");
+  const outOfStock = live.filter((p) => p.stock === 0).length;
+  const lowStock = live.filter((p) => p.stock > 0 && p.stock <= LOW_STOCK).length;
+  const statusCount = (s: ProductStatus) => allProducts.filter((p) => p.status === s).length;
 
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{products.length} products</p>
+        <div className="flex flex-wrap gap-2">
+          {(["all", ...PRODUCT_STATUSES.map((s) => s.value)] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                statusFilter === s
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {s === "all"
+                ? `All (${allProducts.length})`
+                : `${PRODUCT_STATUSES.find((x) => x.value === s)?.label} (${statusCount(s)})`}
+            </button>
+          ))}
+        </div>
         <div className="flex gap-2">
           {editingStock ? (
             <>
@@ -1097,6 +1161,7 @@ function ProductsPanel() {
             <TableHeader>
               <TableRow>
                 <TableHead>Product</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Stock</TableHead>
@@ -1120,6 +1185,27 @@ function ProductsPanel() {
                         <p className="text-xs text-muted-foreground">{p.brand}</p>
                       </div>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={p.status}
+                      disabled={changingStatus === p.id}
+                      onValueChange={(v) => changeStatus(p, v as ProductStatus)}
+                    >
+                      <SelectTrigger
+                        aria-label={`Status of ${p.name}`}
+                        className={`h-7 w-[108px] border-0 text-xs font-medium ${PRODUCT_STATUS_STYLES[p.status]}`}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PRODUCT_STATUSES.map((s) => (
+                          <SelectItem key={s.value} value={s.value}>
+                            {s.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   <TableCell className="text-sm">{p.category}</TableCell>
                   <TableCell className="font-semibold">{formatKES(p.price_kes)}</TableCell>
@@ -1192,6 +1278,26 @@ function ProductsPanel() {
             <SheetTitle>{form.id ? "Edit product" : "Add product"}</SheetTitle>
           </SheetHeader>
           <form onSubmit={save} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Status</Label>
+              <Select
+                value={form.status}
+                onValueChange={(v) => setForm((f) => ({ ...f, status: v as ProductStatus }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRODUCT_STATUSES.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">{PRODUCT_STATUS_HELP[form.status]}</p>
+            </div>
+
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label>Name</Label>
@@ -1464,7 +1570,8 @@ function ProductsPanel() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete product?</AlertDialogTitle>
             <AlertDialogDescription>
-              This cannot be undone. The product will be removed from the store immediately.
+              This cannot be undone. The product will be removed from the store immediately. To stop
+              selling it but keep its details, set its status to Archived instead.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

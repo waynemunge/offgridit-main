@@ -14,7 +14,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { fetchProductBySlug, productsQueryOptions } from "@/lib/products";
+import { fetchProductBySlug, productsQueryOptions, useLiveVersions } from "@/lib/products";
 import { trackProduct, getRecentlyViewed } from "@/lib/recently-viewed";
 import { discountPercent, formatKES } from "@/lib/format";
 import { useCart } from "@/lib/cart-context";
@@ -143,6 +143,7 @@ function ProductDetail() {
       .filter(Boolean)
       .join(" / ") || undefined;
   const [recentItems, setRecentItems] = useState(() => getRecentlyViewed(product.id));
+  const visibleRecent = useLiveVersions(recentItems);
 
   useEffect(() => {
     trackProduct(product);
@@ -338,11 +339,11 @@ function ProductDetail() {
 
       <ReviewsSection productId={product.id} />
 
-      {recentItems.length > 0 && (
+      {visibleRecent.length > 0 && (
         <section className="mt-20">
           <h2 className="mb-6 text-2xl font-bold">Recently viewed</h2>
           <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4">
-            {recentItems.map((item) => (
+            {visibleRecent.map((item) => (
               <Link
                 key={item.id}
                 to="/product/$slug"

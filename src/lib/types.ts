@@ -1,3 +1,12 @@
+/** draft: being set up · active: Live in the store · archived: no longer sold. */
+export type ProductStatus = "draft" | "active" | "archived";
+
+export const PRODUCT_STATUSES: { value: ProductStatus; label: string }[] = [
+  { value: "draft", label: "Draft" },
+  { value: "active", label: "Live" },
+  { value: "archived", label: "Archived" },
+];
+
 export interface ProductVariantGroup {
   name: string;
   options: string[];
@@ -20,6 +29,7 @@ export interface Product {
   is_featured: boolean;
   is_on_sale: boolean;
   sale_ends_at?: string | null;
+  status: ProductStatus;
   created_at: string;
 }
 

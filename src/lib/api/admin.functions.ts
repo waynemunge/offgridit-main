@@ -82,6 +82,7 @@ const productInputSchema = z.object({
   is_featured: z.boolean(),
   is_on_sale: z.boolean(),
   sale_ends_at: z.string().nullable().optional(),
+  status: z.enum(["draft", "active", "archived"]),
 });
 
 export const adminSaveProduct = createServerFn({ method: "POST" })
@@ -103,6 +104,19 @@ export const adminSaveProduct = createServerFn({ method: "POST" })
     const { data: product, error } = await db.from("products").insert(fields).select().single();
     if (error) throw error;
     return product;
+  });
+
+/** Quick status change from the product list (Draft / Live / Archived). */
+export const adminSetProductStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    z.object({ id: z.string().uuid(), status: z.enum(["draft", "active", "archived"]) }),
+  )
+  .handler(async ({ data, context }) => {
+    const db = await requireAdmin(context.userId);
+    const { error } = await db.from("products").update({ status: data.status }).eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
   });
 
 export const adminBulkUpdateStock = createServerFn({ method: "POST" })
