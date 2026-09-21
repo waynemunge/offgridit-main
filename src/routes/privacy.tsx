@@ -16,7 +16,7 @@ function PrivacyPage() {
   return (
     <div className="container-px mx-auto max-w-3xl py-14">
       <h1 className="mb-2 text-4xl font-bold">Privacy Policy</h1>
-      <p className="mb-10 text-sm text-muted-foreground">Last updated: June 2025</p>
+      <p className="mb-10 text-sm text-muted-foreground">Last updated: 21 September 2026</p>
 
       <div className="prose prose-neutral dark:prose-invert max-w-none space-y-8 text-sm leading-relaxed text-muted-foreground [&_h2]:mb-3 [&_h2]:mt-8 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-foreground [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1">
         <p>
@@ -51,7 +51,9 @@ function PrivacyPage() {
             </li>
             <li>
               <strong className="text-foreground">Order data:</strong> full name, phone number,
-              delivery address, order history
+              email address, order history and any notes you add at checkout. We don&apos;t ask for
+              your address online — if you choose delivery, we note your delivery location when we
+              call or WhatsApp you to arrange it
             </li>
             <li>
               <strong className="text-foreground">Payment data:</strong> payment method selection.
@@ -101,6 +103,10 @@ function PrivacyPage() {
           <ul>
             <li>Payment processors (M-Pesa / card networks) to complete transactions</li>
             <li>Email service providers (Resend) to deliver order confirmations</li>
+            <li>
+              Delivery riders or couriers — your name, phone number and delivery location, only when
+              you choose delivery
+            </li>
             <li>
               Cloud infrastructure providers (Supabase, Vercel) that host this platform under strict
               data processing agreements
