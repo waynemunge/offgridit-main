@@ -211,8 +211,7 @@ export async function sendRestockEmails(productIds: string[]): Promise<number> {
   if (!resend || !productIds.length) return 0;
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db: any = supabaseAdmin;
+  const db = supabaseAdmin;
 
   const { data: notifs } = await db
     .from("restock_notifications")

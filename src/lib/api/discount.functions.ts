@@ -10,8 +10,7 @@ async function requireAdmin(userId: string) {
     .eq("id", userId)
     .single();
   if (!data?.is_admin) throw new Error("Unauthorized");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return supabaseAdmin as any;
+  return supabaseAdmin;
 }
 
 export const validateDiscountCode = createServerFn({ method: "POST" })
@@ -23,8 +22,7 @@ export const validateDiscountCode = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db: any = supabaseAdmin;
+    const db = supabaseAdmin;
     const { data: row, error } = await db
       .from("discount_codes")
       .select("*")

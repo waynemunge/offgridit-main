@@ -11,8 +11,7 @@ export const subscribeToRestock = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db: any = supabaseAdmin;
+    const db = supabaseAdmin;
     const { error } = await db
       .from("restock_notifications")
       .upsert(

@@ -37,8 +37,7 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const db = await requireAdmin(context.userId);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: result, error } = await (db as any).rpc("set_order_status", {
+    const { data: result, error } = await db.rpc("set_order_status", {
       p_order_id: data.orderId,
       p_status: data.status,
     });
@@ -89,7 +88,7 @@ export const adminSaveProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(productInputSchema)
   .handler(async ({ data, context }) => {
-    const db: any = await requireAdmin(context.userId);
+    const db = await requireAdmin(context.userId);
     const { id, ...fields } = data;
     if (id) {
       const { data: product, error } = await db
@@ -139,7 +138,7 @@ export const adminUpdateOrderNotes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ orderId: z.string().uuid(), notes: z.string() }))
   .handler(async ({ data, context }) => {
-    const db: any = await requireAdmin(context.userId);
+    const db = await requireAdmin(context.userId);
     const { error } = await db
       .from("orders")
       .update({ admin_notes: data.notes || null })

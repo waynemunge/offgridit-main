@@ -14,8 +14,7 @@ export const submitReview = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db: any = supabaseAdmin;
+    const db = supabaseAdmin;
     const { error } = await db.from("reviews").upsert(
       {
         product_id: data.productId,
@@ -35,8 +34,7 @@ export const deleteReview = createServerFn({ method: "POST" })
   .inputValidator(z.object({ reviewId: z.string().uuid() }))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db: any = supabaseAdmin;
+    const db = supabaseAdmin;
     const { error } = await db
       .from("reviews")
       .delete()
