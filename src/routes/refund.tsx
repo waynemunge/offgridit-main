@@ -16,7 +16,7 @@ function RefundPage() {
   return (
     <div className="container-px mx-auto max-w-3xl py-14">
       <h1 className="mb-2 text-4xl font-bold">Refund &amp; Returns Policy</h1>
-      <p className="mb-10 text-sm text-muted-foreground">Last updated: June 2025</p>
+      <p className="mb-10 text-sm text-muted-foreground">Last updated: 21 September 2026</p>
 
       <div className="space-y-8 text-sm leading-relaxed text-muted-foreground [&_h2]:mb-3 [&_h2]:mt-8 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-foreground [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1">
         <p>
@@ -29,7 +29,8 @@ function RefundPage() {
           <h2>1. Return Window</h2>
           <p>
             You may return most items within <strong className="text-foreground">7 days</strong> of
-            the delivery date. To be eligible, the item must be:
+            receiving them, whether you picked them up or had them delivered. To be eligible, the
+            item must be:
           </p>
           <ul>
             <li>In its original, unopened packaging (for sealed items)</li>
@@ -45,7 +46,7 @@ function RefundPage() {
             <li>Items that have been opened and used</li>
             <li>Software, digital downloads, or SIM cards</li>
             <li>Items damaged due to misuse, accidents, or unauthorised modification</li>
-            <li>Items returned after 7 days of delivery</li>
+            <li>Items returned more than 7 days after you received them</li>
           </ul>
         </section>
 
@@ -53,7 +54,7 @@ function RefundPage() {
           <h2>3. Faulty or Incorrect Items</h2>
           <p>
             If you receive a faulty, damaged, or incorrect item, please contact us within{" "}
-            <strong className="text-foreground">48 hours</strong> of delivery with:
+            <strong className="text-foreground">48 hours</strong> of receiving it with:
           </p>
           <ul>
             <li>Your order ID</li>
