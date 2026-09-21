@@ -7,7 +7,8 @@
 --   active   — Live: shown in the store and can be ordered
 --   archived — no longer sold; hidden from customers, kept for records
 --
--- Existing products become 'active' so the store looks the same after this runs.
+-- Existing products become 'active' so the store looks the same after this runs,
+-- except ones previously marked 'paused', which become 'archived' (hidden).
 -- The live database already had an unused Lovable-era `status` column; it is reused.
 
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS status TEXT;
@@ -25,6 +26,10 @@ BEGIN
     EXECUTE format('ALTER TABLE public.products DROP CONSTRAINT %I', c.conname);
   END LOOP;
 END $$;
+
+-- The live database had 3 products marked 'paused' (never enforced by the app);
+-- the owner chose to hide them, so they become archived.
+UPDATE public.products SET status = 'archived' WHERE status = 'paused';
 
 UPDATE public.products
    SET status = 'active'
