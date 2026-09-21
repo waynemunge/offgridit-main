@@ -83,8 +83,8 @@ export const adminBulkUpdateStock = createServerFn({ method: "POST" })
     // Notify back-in-stock subscribers for products that now have stock
     const restocked = data.filter((item) => item.stock > 0).map((item) => item.id);
     if (restocked.length) {
-      const { sendRestockNotifications } = await import("./notifications.functions");
-      await sendRestockNotifications({ data: restocked }).catch(() => {});
+      const { sendRestockEmails } = await import("../email.server");
+      await sendRestockEmails(restocked).catch((err) => console.error("Restock emails failed:", err));
     }
     return { updated: data.length };
   });

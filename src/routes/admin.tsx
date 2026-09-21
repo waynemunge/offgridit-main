@@ -100,14 +100,17 @@ type Order = {
   full_name: string;
   email: string;
   phone: string;
-  address: string;
-  city: string;
+  // Only on older orders — pickup/delivery is now arranged by phone/WhatsApp.
+  address: string | null;
+  city: string | null;
   delivery_notes: string | null;
   admin_notes?: string | null;
   payment_method: string;
   status: string;
   subtotal_kes: number;
   delivery_fee_kes: number;
+  discount_kes?: number | null;
+  discount_code?: string | null;
   total_kes: number;
   created_at: string;
   order_items: OrderItem[];
@@ -118,6 +121,7 @@ type OrderItem = {
   product_name: string;
   product_brand: string;
   product_image: string | null;
+  variant?: string | null;
   quantity: number;
   unit_price_kes: number;
   total_price_kes: number;
@@ -257,9 +261,9 @@ function AdminDashboard() {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function downloadCSV(filename: string, rows: (string | number)[][]) {
+function downloadCSV(filename: string, rows: (string | number | null)[][]) {
   const csv = rows
-    .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+    .map((r) => r.map((c) => `"${String(c ?? "").replace(/"/g, '""')}"`).join(","))
     .join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
@@ -735,8 +739,12 @@ function OrdersPanel() {
                     <TableRow key={`${order.id}-items`}>
                       <TableCell colSpan={7} className="bg-secondary/30 p-4">
                         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                          Delivery: {order.address}, {order.city}
+                          Contact: {order.phone}
+                          {order.address ? ` · Address: ${[order.address, order.city].filter(Boolean).join(", ")}` : ""}
                           {order.delivery_notes ? ` — ${order.delivery_notes}` : ""}
+                          {Number(order.discount_kes) > 0
+                            ? ` · Discount ${order.discount_code ?? ""} -${formatKES(Number(order.discount_kes))}`
+                            : ""}
                         </p>
                         <div className="space-y-2">
                           {order.order_items.map((item) => (
@@ -744,7 +752,12 @@ function OrdersPanel() {
                               {item.product_image && (
                                 <img src={item.product_image} alt="" className="h-10 w-10 rounded-lg object-cover" />
                               )}
-                              <span className="flex-1 font-medium">{item.product_name}</span>
+                              <span className="flex-1 font-medium">
+                                {item.product_name}
+                                {item.variant && (
+                                  <span className="ml-1 font-normal text-muted-foreground">· {item.variant}</span>
+                                )}
+                              </span>
                               <span className="text-muted-foreground">×{item.quantity}</span>
                               <span className="font-semibold">{formatKES(Number(item.total_price_kes))}</span>
                             </div>

@@ -28,6 +28,7 @@ type OrderItem = {
   product_name: string;
   product_brand: string;
   product_image: string | null;
+  variant?: string | null;
   quantity: number;
   unit_price_kes: number;
   total_price_kes: number;
@@ -38,10 +39,13 @@ type Order = {
   status: string;
   payment_method: string;
   full_name: string;
-  address: string;
-  city: string;
+  // Only on older orders — pickup/delivery is now arranged by phone/WhatsApp.
+  address: string | null;
+  city: string | null;
   subtotal_kes: number;
   delivery_fee_kes: number;
+  discount_kes?: number | null;
+  discount_code?: string | null;
   total_kes: number;
   created_at: string;
   order_items: OrderItem[];
@@ -175,7 +179,10 @@ function OrdersList({ userId }: { userId: string }) {
                         )}
                         <div className="flex-1 min-w-0">
                           <p className="truncate text-sm font-medium">{item.product_name}</p>
-                          <p className="text-xs text-muted-foreground">{item.product_brand} · Qty {item.quantity}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {item.product_brand}
+                            {item.variant && ` · ${item.variant}`} · Qty {item.quantity}
+                          </p>
                         </div>
                         <span className="shrink-0 text-sm font-semibold">
                           {formatKES(Number(item.total_price_kes))}
@@ -188,16 +195,26 @@ function OrdersList({ userId }: { userId: string }) {
                     <div className="flex justify-between text-muted-foreground">
                       <dt>Subtotal</dt><dd>{formatKES(Number(order.subtotal_kes))}</dd>
                     </div>
-                    <div className="flex justify-between text-muted-foreground">
-                      <dt>Delivery</dt><dd>{formatKES(Number(order.delivery_fee_kes))}</dd>
-                    </div>
+                    {Number(order.delivery_fee_kes) > 0 && (
+                      <div className="flex justify-between text-muted-foreground">
+                        <dt>Delivery</dt><dd>{formatKES(Number(order.delivery_fee_kes))}</dd>
+                      </div>
+                    )}
+                    {Number(order.discount_kes) > 0 && (
+                      <div className="flex justify-between text-success">
+                        <dt>Discount{order.discount_code ? ` (${order.discount_code})` : ""}</dt>
+                        <dd>-{formatKES(Number(order.discount_kes))}</dd>
+                      </div>
+                    )}
                     <div className="flex justify-between font-bold pt-1 text-base">
                       <dt>Total</dt><dd>{formatKES(Number(order.total_kes))}</dd>
                     </div>
                   </dl>
 
                   <p className="mt-3 text-xs text-muted-foreground">
-                    Delivering to {order.address}, {order.city}
+                    {order.address
+                      ? `Delivering to ${[order.address, order.city].filter(Boolean).join(", ")}`
+                      : "Pickup or delivery is arranged with you by call or WhatsApp."}
                   </p>
                 </div>
               )}

@@ -51,16 +51,8 @@ export const validateDiscountCode = createServerFn({ method: "POST" })
     };
   });
 
-export const redeemDiscountCode = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ id: z.string().uuid() }))
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db: any = supabaseAdmin;
-    const { data: row } = await db.from("discount_codes").select("uses").eq("id", data.id).single();
-    await db.from("discount_codes").update({ uses: (row?.uses ?? 0) + 1 }).eq("id", data.id);
-    return { ok: true };
-  });
+// Codes are redeemed inside place_order() (same transaction as the order), so
+// there is no public "redeem" endpoint — it let anyone burn through a code's uses.
 
 export const adminGetDiscountCodes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
