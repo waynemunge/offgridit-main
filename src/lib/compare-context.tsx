@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { useLiveVersions } from "./products";
 import type { Product } from "./types";
 
 const MAX = 3;
@@ -55,8 +56,10 @@ export function CompareProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const visible = useLiveVersions(items);
+
   return (
-    <CompareContext.Provider value={{ items, toggle, isInComparison, clear }}>
+    <CompareContext.Provider value={{ items: visible, toggle, isInComparison, clear }}>
       {children}
     </CompareContext.Provider>
   );

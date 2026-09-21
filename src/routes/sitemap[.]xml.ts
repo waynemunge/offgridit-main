@@ -31,7 +31,10 @@ export const Route = createFileRoute("/sitemap.xml")({
         let products: { slug: string }[] = [];
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const { data } = await supabaseAdmin.from("products").select("slug");
+          const { data } = await supabaseAdmin
+            .from("products")
+            .select("slug")
+            .eq("status", "active");
           products = data ?? [];
         } catch {
           products = [];

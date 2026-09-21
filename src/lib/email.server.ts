@@ -215,8 +215,9 @@ export async function sendRestockEmails(productIds: string[]): Promise<number> {
 
   const { data: notifs } = await db
     .from("restock_notifications")
-    .select("id, email, products(name, slug)")
+    .select("id, email, products!inner(name, slug, status)")
     .in("product_id", productIds)
+    .eq("products.status", "active")
     .is("notified_at", null);
   if (!notifs?.length) return 0;
 

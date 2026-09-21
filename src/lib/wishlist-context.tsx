@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
+import { useLiveVersions } from "./products";
 import type { Product } from "./types";
 
 interface WishlistCtx {
@@ -47,8 +48,10 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     [items],
   );
 
+  const visible = useLiveVersions(items);
+
   return (
-    <WishlistContext.Provider value={{ items, count: items.length, toggle, isWished }}>
+    <WishlistContext.Provider value={{ items: visible, count: visible.length, toggle, isWished }}>
       {children}
     </WishlistContext.Provider>
   );
