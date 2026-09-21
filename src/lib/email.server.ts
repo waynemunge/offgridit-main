@@ -3,9 +3,7 @@
 // arbitrary email through our Resend account — call them only from trusted
 // server code (placeOrder, admin functions).
 import process from "node:process";
-
-export const SITE_URL = "https://www.offgridit.store";
-export const WHATSAPP_URL = "https://wa.me/254702699933";
+import { SITE_URL, WHATSAPP_URL } from "./site";
 
 function fromAddress() {
   // onboarding@resend.dev works until a custom domain is verified in Resend.

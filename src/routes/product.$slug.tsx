@@ -10,14 +10,15 @@ import {
   Plus,
   ShoppingCart,
   Star,
+  MessageCircle,
   Trash2,
-  Truck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { fetchProductBySlug, productsQueryOptions } from "@/lib/products";
 import { trackProduct, getRecentlyViewed } from "@/lib/recently-viewed";
 import { discountPercent, formatKES } from "@/lib/format";
 import { useCart } from "@/lib/cart-context";
+import { FULFILMENT_SHORT, absoluteUrl, seo } from "@/lib/site";
 import { useAuth } from "@/lib/auth-context";
 import { useAuthModal } from "@/lib/auth-modal";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,19 +41,23 @@ export const Route = createFileRoute("/product/$slug")({
   },
   head: ({ loaderData: p }) => {
     if (!p) return {};
+    const url = absoluteUrl(`/product/${p.slug}`);
+    const images = p.images.map((img) => (img.startsWith("http") ? img : absoluteUrl(img)));
+    const summary = p.description?.trim() || `${p.brand} ${p.name}`;
+    const description = `${summary.length > 150 ? `${summary.slice(0, 147).trimEnd()}…` : summary} — ${formatKES(p.price_kes)} at OffGridIt.`;
     const jsonLd = {
       "@context": "https://schema.org",
       "@type": "Product",
       name: p.name,
-      description: p.description ?? p.name,
-      image: p.images,
+      description: summary,
+      image: images,
       brand: { "@type": "Brand", name: p.brand },
       offers: {
         "@type": "Offer",
         priceCurrency: "KES",
         price: p.price_kes,
         availability: p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-        url: `https://offgridit.co.ke/product/${p.slug}`,
+        url,
       },
       ...(p.rating > 0
         ? {
@@ -65,13 +70,19 @@ export const Route = createFileRoute("/product/$slug")({
           }
         : {}),
     };
+    const tags = seo({
+      title: `${p.name} — OffGridIt`,
+      description,
+      path: `/product/${p.slug}`,
+      image: images[0],
+      type: "product",
+    });
     return {
+      ...tags,
       meta: [
-        { title: `${p.name} — OffGridIt` },
-        { name: "description", content: p.description ?? p.name },
-        { property: "og:title", content: `${p.name} — OffGridIt` },
-        { property: "og:description", content: p.description ?? p.name },
-        { property: "og:image", content: p.images[0] ?? "" },
+        ...tags.meta,
+        { property: "product:price:amount", content: String(p.price_kes) },
+        { property: "product:price:currency", content: "KES" },
       ],
       scripts: [
         { type: "application/ld+json", children: JSON.stringify(jsonLd) },
@@ -81,14 +92,14 @@ export const Route = createFileRoute("/product/$slug")({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "Home", item: "https://offgridit.co.ke/" },
+              { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
               {
                 "@type": "ListItem",
                 position: 2,
                 name: p.category,
-                item: `https://offgridit.co.ke/shop?category=${encodeURIComponent(p.category)}`,
+                item: absoluteUrl(`/shop?category=${encodeURIComponent(p.category)}`),
               },
-              { "@type": "ListItem", position: 3, name: p.name },
+              { "@type": "ListItem", position: 3, name: p.name, item: url },
             ],
           }),
         },
@@ -153,11 +164,7 @@ function ProductDetail() {
           Home
         </Link>
         <ChevronRight className="h-3.5 w-3.5 shrink-0" />
-        <Link
-          to="/shop"
-          search={{ category: product.category } as any}
-          className="hover:text-foreground"
-        >
+        <Link to="/shop" search={{ category: product.category }} className="hover:text-foreground">
           {product.category}
         </Link>
         <ChevronRight className="h-3.5 w-3.5 shrink-0" />
@@ -302,8 +309,8 @@ function ProductDetail() {
           {!inStock && <RestockForm productId={product.id} />}
 
           <div className="mt-5 flex items-center gap-2 rounded-xl border border-border bg-card/50 p-4 text-sm text-muted-foreground">
-            <Truck className="h-5 w-5 text-primary" />
-            Free delivery in Nairobi over {formatKES(50000)} • M-Pesa &amp; card accepted
+            <MessageCircle className="h-5 w-5 shrink-0 text-primary" />
+            {FULFILMENT_SHORT} after you order • M-Pesa or card
           </div>
 
           {specs.length > 0 && (

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
-
-const BASE_URL = "https://offgridit.com";
+import { CATEGORIES } from "@/lib/types";
+import { SITE_URL } from "@/lib/site";
 
 interface SitemapEntry {
   path: string;
@@ -21,6 +21,11 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/privacy", changefreq: "monthly", priority: "0.3" },
           { path: "/terms", changefreq: "monthly", priority: "0.3" },
           { path: "/refund", changefreq: "monthly", priority: "0.3" },
+          ...CATEGORIES.map((c) => ({
+            path: `/shop?category=${encodeURIComponent(c)}`,
+            changefreq: "daily" as const,
+            priority: "0.7",
+          })),
         ];
 
         let products: { slug: string }[] = [];
@@ -45,7 +50,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           .map((e) =>
             [
               `  <url>`,
-              `    <loc>${BASE_URL}${e.path}</loc>`,
+              `    <loc>${SITE_URL}${e.path.replace(/&/g, "&amp;")}</loc>`,
               e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
               e.priority ? `    <priority>${e.priority}</priority>` : null,
               `  </url>`,

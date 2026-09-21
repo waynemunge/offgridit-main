@@ -26,6 +26,14 @@ import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
 import { CompareBar } from "@/components/product/CompareBar";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { Toaster } from "@/components/ui/sonner";
+import {
+  DEFAULT_OG_IMAGE,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_TAGLINE,
+  SITE_URL,
+  WHATSAPP_NUMBER,
+} from "@/lib/site";
 
 function NotFoundComponent() {
   return (
@@ -92,42 +100,38 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "OffGridIt — Premium Gadgets & Tech in Kenya" },
-      {
-        name: "description",
-        content:
-          "Shop genuine phones, laptops, audio, wearables and accessories at OffGridIt. Fast delivery across Kenya, warranty included, pay with M-Pesa or card.",
-      },
-      { name: "author", content: "OffGridIt" },
-      { property: "og:title", content: "OffGridIt — Premium Gadgets & Tech in Kenya" },
-      {
-        property: "og:description",
-        content: "Premium gadgets, genuine warranties, delivered fast across Kenya.",
-      },
+      // Site-wide defaults; pages override these through seo() in their own head().
+      { title: `${SITE_NAME} — ${SITE_TAGLINE}` },
+      { name: "description", content: SITE_DESCRIPTION },
+      { name: "author", content: SITE_NAME },
+      { name: "theme-color", content: "#111318" },
+      { property: "og:site_name", content: SITE_NAME },
+      { property: "og:locale", content: "en_KE" },
       { property: "og:type", content: "website" },
+      { property: "og:title", content: `${SITE_NAME} — ${SITE_TAGLINE}` },
+      { property: "og:description", content: SITE_DESCRIPTION },
+      { property: "og:image", content: DEFAULT_OG_IMAGE },
+      { property: "og:image:width", content: "1920" },
+      { property: "og:image:height", content: "1080" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "OffGridIt — Premium Gadgets & Tech in Kenya" },
+      { name: "twitter:title", content: `${SITE_NAME} — ${SITE_TAGLINE}` },
+      { name: "twitter:description", content: SITE_DESCRIPTION },
+      { name: "twitter:image", content: DEFAULT_OG_IMAGE },
+    ],
+    scripts: [
       {
-        name: "description",
-        content: "OffGridIt E-commerce Hub is a modern online store for tech gadgets.",
-      },
-      {
-        property: "og:description",
-        content: "OffGridIt E-commerce Hub is a modern online store for tech gadgets.",
-      },
-      {
-        name: "twitter:description",
-        content: "OffGridIt E-commerce Hub is a modern online store for tech gadgets.",
-      },
-      {
-        property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/54a24f9c-49fc-43df-b1bf-03670598f3ee/id-preview-371e2193--27bdf4c0-2b6d-4b69-b511-9e6bf97fc0b5.lovable.app-1781179928048.png",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/54a24f9c-49fc-43df-b1bf-03670598f3ee/id-preview-371e2193--27bdf4c0-2b6d-4b69-b511-9e6bf97fc0b5.lovable.app-1781179928048.png",
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Store",
+          name: SITE_NAME,
+          url: SITE_URL,
+          image: DEFAULT_OG_IMAGE,
+          telephone: `+${WHATSAPP_NUMBER}`,
+          address: { "@type": "PostalAddress", addressCountry: "KE" },
+          currenciesAccepted: "KES",
+          paymentAccepted: "M-Pesa",
+        }),
       },
     ],
     links: [

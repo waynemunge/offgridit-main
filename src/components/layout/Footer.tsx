@@ -26,7 +26,9 @@ export function Footer() {
               OffGrid<span className="-ml-2 text-primary">It</span>
             </Link>
             <p className="max-w-xs text-sm text-muted-foreground">
-              Premium gadgets, genuine warranties, delivered fast across Kenya.
+              Premium gadgets with genuine warranties. Order online, pay with M-Pesa, and wePremium
+              gadgets, genuine warranties, delivered fast across Kenya.apos;ll arrange pickup or
+              delivery with you.
             </p>
           </div>
 
@@ -35,11 +37,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               {CATEGORIES.map((c) => (
                 <li key={c}>
-                  <Link
-                    to="/shop"
-                    search={{ category: c } as any}
-                    className="hover:text-foreground"
-                  >
+                  <Link to="/shop" search={{ category: c }} className="hover:text-foreground">
                     {c}
                   </Link>
                 </li>

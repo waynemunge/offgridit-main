@@ -1,11 +1,12 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { WHATSAPP_URL } from "@/lib/site";
 
 export function WhatsAppButton() {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <a
-          href="https://wa.me/254702699933"
+          href={WHATSAPP_URL}
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Chat on WhatsApp"

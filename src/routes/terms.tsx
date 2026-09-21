@@ -1,15 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { seo } from "@/lib/site";
 
 export const Route = createFileRoute("/terms")({
-  head: () => ({
-    meta: [
-      { title: "Terms of Service — OffGridIt" },
-      {
-        name: "description",
-        content: "Terms and conditions governing your use of the OffGridIt online store.",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "Terms of Service — OffGridIt",
+      description: "Terms and conditions governing your use of the OffGridIt online store.",
+      path: "/terms",
+    }),
   component: TermsPage,
 });
 
@@ -22,7 +20,7 @@ function TermsPage() {
       <div className="space-y-8 text-sm leading-relaxed text-muted-foreground [&_h2]:mb-3 [&_h2]:mt-8 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-foreground [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1">
         <p>
           By accessing or purchasing from{" "}
-          <strong className="text-foreground">offgridit.co.ke</strong> you agree to be bound by
+          <strong className="text-foreground">offgridit.store</strong> you agree to be bound by
           these Terms of Service. Please read them carefully before placing an order.
         </p>
 
@@ -93,14 +91,17 @@ function TermsPage() {
         </section>
 
         <section>
-          <h2>5. Delivery</h2>
+          <h2>5. Pickup &amp; Delivery</h2>
           <ul>
-            <li>We deliver within Kenya. Delivery timelines are estimates and not guaranteed.</li>
             <li>
-              Free delivery within Nairobi on orders over KES 50,000. Delivery fees apply for other
-              orders and locations.
+              No delivery fee is charged at checkout. After you order, we call or WhatsApp you to
+              arrange pickup or delivery within Kenya.
             </li>
-            <li>Risk of loss passes to you upon delivery to the specified address.</li>
+            <li>
+              Any delivery cost and the expected timeline are agreed with you on that call before
+              your order is dispatched. Timelines are estimates and not guaranteed.
+            </li>
+            <li>Risk of loss passes to you when you collect the item or it is delivered to you.</li>
             <li>
               We are not responsible for delays caused by third-party courier services, weather, or
               events beyond our control.

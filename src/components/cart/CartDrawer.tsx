@@ -1,12 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
+import { FULFILMENT_SHORT } from "@/lib/site";
+import { CartLineStatus } from "./CartLineStatus";
 import { formatKES } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 export function CartDrawer() {
-  const { lines, isOpen, setOpen, subtotal, updateQty, removeItem, count } = useCart();
+  const { lines, isOpen, setOpen, subtotal, updateQty, removeItem, count, hasUnavailable } =
+    useCart();
 
   return (
     <Sheet open={isOpen} onOpenChange={setOpen}>
@@ -61,9 +64,20 @@ export function CartDrawer() {
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
-                      <p className="text-sm font-semibold">{formatKES(line.product.price_kes)}</p>
+                      <p className="text-sm font-semibold">
+                        {formatKES(line.product.price_kes)}
+                        {line.variant && (
+                          <span className="font-normal text-muted-foreground">
+                            {" "}
+                            · {line.variant}
+                          </span>
+                        )}
+                      </p>
+                      <CartLineStatus line={line} />
                       <div className="mt-auto flex items-center gap-2">
-                        <div className="flex items-center rounded-lg border border-border">
+                        <div
+                          className={`flex items-center rounded-lg border border-border ${line.status !== "ok" ? "hidden" : ""}`}
+                        >
                           <button
                             aria-label="Decrease quantity"
                             className="px-2 py-1 text-muted-foreground hover:text-foreground disabled:opacity-40"
@@ -75,7 +89,8 @@ export function CartDrawer() {
                           <span className="w-8 text-center text-sm">{line.quantity}</span>
                           <button
                             aria-label="Increase quantity"
-                            className="px-2 py-1 text-muted-foreground hover:text-foreground"
+                            className="px-2 py-1 text-muted-foreground hover:text-foreground disabled:opacity-40"
+                            disabled={line.quantity >= line.maxQty}
                             onClick={() => updateQty(line.product.id, line.quantity + 1)}
                           >
                             <Plus className="h-3.5 w-3.5" />
@@ -94,15 +109,23 @@ export function CartDrawer() {
                 <span className="text-lg font-bold">{formatKES(subtotal)}</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                Shipping &amp; M-Pesa / card payment calculated at checkout.
+                {hasUnavailable
+                  ? "Remove sold-out items to check out."
+                  : `No payment taken online. ${FULFILMENT_SHORT}.`}
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" onClick={() => setOpen(false)} asChild>
                   <Link to="/cart">View cart</Link>
                 </Button>
-                <Button variant="hero" onClick={() => setOpen(false)} asChild>
-                  <Link to="/checkout">Checkout</Link>
-                </Button>
+                {hasUnavailable ? (
+                  <Button variant="hero" disabled>
+                    Checkout
+                  </Button>
+                ) : (
+                  <Button variant="hero" onClick={() => setOpen(false)} asChild>
+                    <Link to="/checkout">Checkout</Link>
+                  </Button>
+                )}
               </div>
             </div>
           </>

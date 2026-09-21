@@ -1,18 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BadgeCheck, Globe, HeartHandshake, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { seo } from "@/lib/site";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "About OffGridIt — Premium Tech, Done Right" },
-      {
-        name: "description",
-        content:
-          "OffGridIt brings genuine, premium gadgets to Kenya with honest pricing, real warranties and human support. Learn our story.",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "About OffGridIt — Premium Tech, Done Right",
+      description:
+        "OffGridIt brings genuine, premium gadgets to Kenya with honest pricing, real warranties and human support. Learn our story.",
+      path: "/about",
+    }),
   component: About,
 });
 
@@ -25,7 +23,7 @@ const VALUES = [
   {
     icon: Zap,
     title: "Fast & reliable",
-    desc: "Same-day delivery in Nairobi and quick shipping countrywide.",
+    desc: "Order online and we call or WhatsApp you to arrange pickup or delivery.",
   },
   {
     icon: HeartHandshake,
@@ -54,8 +52,8 @@ function About() {
         </p>
         <p className="mt-4 text-muted-foreground">
           Today we curate a tight selection of flagship phones, laptops, audio, wearables and the
-          accessories that keep them running — all genuine, all warrantied, delivered fast. No
-          clutter, no gimmicks. Just confident, product-forward tech retail you can trust.
+          accessories that keep them running — all genuine, all warrantied. No clutter, no gimmicks.
+          Just confident, product-forward tech retail you can trust.
         </p>
       </div>
 

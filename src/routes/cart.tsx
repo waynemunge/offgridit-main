@@ -1,16 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
+import { CartLineStatus } from "@/components/cart/CartLineStatus";
 import { formatKES } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { FULFILMENT_SHORT, NO_INDEX } from "@/lib/site";
 
 export const Route = createFileRoute("/cart")({
-  head: () => ({ meta: [{ title: "Your Cart — OffGridIt" }] }),
+  head: () => ({ meta: [{ title: "Your Cart — OffGridIt" }, NO_INDEX] }),
   component: CartPage,
 });
 
 function CartPage() {
-  const { lines, subtotal, updateQty, removeItem, count } = useCart();
+  const { lines, subtotal, updateQty, removeItem, count, hasUnavailable } = useCart();
 
   if (lines.length === 0) {
     return (
@@ -67,9 +69,15 @@ function CartPage() {
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
-                <p className="text-sm text-muted-foreground">{line.product.brand}</p>
+                <p className="text-sm text-muted-foreground">
+                  {line.product.brand}
+                  {line.variant && ` · ${line.variant}`}
+                </p>
+                <CartLineStatus line={line} />
                 <div className="mt-auto flex items-center justify-between">
-                  <div className="flex items-center rounded-lg border border-border">
+                  <div
+                    className={`flex items-center rounded-lg border border-border ${line.status !== "ok" ? "invisible" : ""}`}
+                  >
                     <button
                       aria-label="Decrease"
                       className="px-2.5 py-1.5 text-muted-foreground hover:text-foreground disabled:opacity-40"
@@ -81,13 +89,16 @@ function CartPage() {
                     <span className="w-9 text-center text-sm">{line.quantity}</span>
                     <button
                       aria-label="Increase"
-                      className="px-2.5 py-1.5 text-muted-foreground hover:text-foreground"
+                      className="px-2.5 py-1.5 text-muted-foreground hover:text-foreground disabled:opacity-40"
+                      disabled={line.quantity >= line.maxQty}
                       onClick={() => updateQty(line.product.id, line.quantity + 1)}
                     >
                       <Plus className="h-3.5 w-3.5" />
                     </button>
                   </div>
-                  <span className="font-semibold">
+                  <span
+                    className={`font-semibold ${line.status !== "ok" ? "text-muted-foreground line-through" : ""}`}
+                  >
                     {formatKES(line.product.price_kes * line.quantity)}
                   </span>
                 </div>
@@ -103,18 +114,30 @@ function CartPage() {
               <dt className="text-muted-foreground">Subtotal</dt>
               <dd>{formatKES(subtotal)}</dd>
             </div>
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Shipping</dt>
-              <dd className="text-muted-foreground">Calculated at checkout</dd>
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">Pickup / delivery</dt>
+              <dd className="text-right text-muted-foreground">Arranged after order</dd>
             </div>
           </dl>
           <div className="mt-4 flex justify-between border-t border-border pt-4 text-base font-bold">
             <span>Total</span>
             <span>{formatKES(subtotal)}</span>
           </div>
-          <Button variant="hero" size="lg" className="mt-6 w-full" asChild>
-            <Link to="/checkout">Proceed to checkout</Link>
-          </Button>
+          {hasUnavailable ? (
+            <>
+              <p className="mt-6 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
+                Remove the sold-out items above to continue to checkout.
+              </p>
+              <Button variant="hero" size="lg" className="mt-3 w-full" disabled>
+                Proceed to checkout
+              </Button>
+            </>
+          ) : (
+            <Button variant="hero" size="lg" className="mt-6 w-full" asChild>
+              <Link to="/checkout">Proceed to checkout</Link>
+            </Button>
+          )}
+          <p className="mt-3 text-center text-xs text-muted-foreground">{FULFILMENT_SHORT}.</p>
           <Button variant="ghost" className="mt-2 w-full" asChild>
             <Link to="/shop">Continue shopping</Link>
           </Button>

@@ -8,7 +8,7 @@ import {
   ShieldCheck,
   Smartphone,
   Tablet,
-  Truck,
+  MessageCircle,
   Watch,
   Cable,
 } from "lucide-react";
@@ -17,25 +17,27 @@ import { useReveal } from "@/hooks/use-reveal";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SITE_NAME, SITE_TAGLINE, seo } from "@/lib/site";
 import heroImg from "@/assets/hero.jpg";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "OffGridIt — Premium Gadgets & Tech in Kenya" },
-      {
-        name: "description",
-        content:
-          "Discover flagship phones, laptops, audio and accessories at OffGridIt. Genuine products, fast Kenya-wide delivery, M-Pesa & card checkout.",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+      description:
+        "Discover flagship phones, laptops, audio and accessories at OffGridIt. Genuine products with warranty, pay with M-Pesa, pickup or delivery arranged by call or WhatsApp.",
+      path: "/",
+    }),
   component: Home,
 });
 
 const TRUST = [
   { icon: BadgeCheck, title: "Genuine products", desc: "100% authentic, sealed & verified" },
-  { icon: Truck, title: "Fast delivery", desc: "Same-day in Nairobi, nationwide shipping" },
+  {
+    icon: MessageCircle,
+    title: "Pickup or delivery",
+    desc: "Arranged with you by call or WhatsApp",
+  },
   { icon: ShieldCheck, title: "Warranty included", desc: "Up to 1-year manufacturer warranty" },
   { icon: Headphones, title: "Local support", desc: "Real humans, ready to help" },
 ];
@@ -86,8 +88,8 @@ function Home() {
               <span className="text-gradient">zero compromise.</span>
             </h1>
             <p className="mt-6 max-w-lg text-lg text-muted-foreground">
-              Flagship phones, laptops, audio and more — genuine, warrantied and delivered fast
-              across Kenya. Pay your way with M-Pesa or card.
+              Flagship phones, laptops, audio and more — genuine and warrantied. Order online and
+              we&apos;ll call or WhatsApp you to arrange payment and pickup or delivery.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Button variant="hero" size="xl" asChild>
@@ -96,7 +98,9 @@ function Home() {
                 </Link>
               </Button>
               <Button variant="outline" size="xl" asChild>
-                <Link to="/shop">See all deals</Link>
+                <Link to="/shop" search={{ sale: "1" }}>
+                  See all deals
+                </Link>
               </Button>
             </div>
           </div>
@@ -156,7 +160,7 @@ function Home() {
               <Link
                 key={c.name}
                 to="/shop"
-                search={{ category: c.name } as any}
+                search={{ category: c.name }}
                 className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-6 text-center transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-[var(--shadow-glow)]"
               >
                 <span className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
@@ -180,7 +184,7 @@ function Home() {
               <h2 className="mt-1 text-3xl font-bold sm:text-4xl">Deals &amp; savings</h2>
             </div>
             <Button variant="hero" asChild>
-              <Link to="/shop" search={{ sale: "1" } as any}>
+              <Link to="/shop" search={{ sale: "1" }}>
                 See all deals <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
