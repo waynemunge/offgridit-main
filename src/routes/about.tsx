@@ -17,27 +17,45 @@ export const Route = createFileRoute("/about")({
 });
 
 const VALUES = [
-  { icon: BadgeCheck, title: "Authenticity first", desc: "Every device is genuine, sealed and verified before it reaches you." },
-  { icon: Zap, title: "Fast & reliable", desc: "Same-day delivery in Nairobi and quick shipping countrywide." },
-  { icon: HeartHandshake, title: "Human support", desc: "Real people who actually help — before and after you buy." },
-  { icon: Globe, title: "Built for Kenya", desc: "Local pricing in KES and M-Pesa checkout made simple." },
+  {
+    icon: BadgeCheck,
+    title: "Authenticity first",
+    desc: "Every device is genuine, sealed and verified before it reaches you.",
+  },
+  {
+    icon: Zap,
+    title: "Fast & reliable",
+    desc: "Same-day delivery in Nairobi and quick shipping countrywide.",
+  },
+  {
+    icon: HeartHandshake,
+    title: "Human support",
+    desc: "Real people who actually help — before and after you buy.",
+  },
+  {
+    icon: Globe,
+    title: "Built for Kenya",
+    desc: "Local pricing in KES and M-Pesa checkout made simple.",
+  },
 ];
 
 function About() {
   return (
     <div className="container-px mx-auto max-w-5xl py-16">
       <div className="max-w-2xl">
-        <span className="text-sm font-semibold uppercase tracking-wide text-primary">Our story</span>
+        <span className="text-sm font-semibold uppercase tracking-wide text-primary">
+          Our story
+        </span>
         <h1 className="mt-3 text-4xl font-bold sm:text-5xl">Premium tech, done right.</h1>
         <p className="mt-6 text-lg text-muted-foreground">
           OffGridIt started with a simple frustration: buying great gadgets in Kenya was harder than
-          it should be — counterfeits, unclear warranties and prices that made no sense. We set out to
-          fix that.
+          it should be — counterfeits, unclear warranties and prices that made no sense. We set out
+          to fix that.
         </p>
         <p className="mt-4 text-muted-foreground">
           Today we curate a tight selection of flagship phones, laptops, audio, wearables and the
-          accessories that keep them running — all genuine, all warrantied, delivered fast. No clutter,
-          no gimmicks. Just confident, product-forward tech retail you can trust.
+          accessories that keep them running — all genuine, all warrantied, delivered fast. No
+          clutter, no gimmicks. Just confident, product-forward tech retail you can trust.
         </p>
       </div>
 

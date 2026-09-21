@@ -185,7 +185,9 @@ function Shop() {
           <>
             <p className="text-sm text-muted-foreground">Search results for</p>
             <h1 className="mt-1 text-3xl font-bold sm:text-4xl">"{query}"</h1>
-            <p className="mt-1 text-sm text-muted-foreground">{filtered.length} product{filtered.length !== 1 ? "s" : ""} found</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {filtered.length} product{filtered.length !== 1 ? "s" : ""} found
+            </p>
             <form onSubmit={submitSearch} className="relative mt-4 max-w-md">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -273,21 +275,24 @@ function Shop() {
                 {query ? `No results for "${query}"` : "No products match your filters"}
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                {query ? "Try a different word, or browse by category below." : "Try adjusting your filters."}
+                {query
+                  ? "Try a different word, or browse by category below."
+                  : "Try adjusting your filters."}
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-2">
-                {query && CATEGORIES.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => {
-                      setSearchInput("");
-                      navigate({ search: { category: cat } });
-                    }}
-                    className="rounded-full border border-border bg-secondary/50 px-3 py-1.5 text-sm font-medium hover:border-primary/50 hover:bg-primary/10 hover:text-primary transition-colors"
-                  >
-                    {cat}
-                  </button>
-                ))}
+                {query &&
+                  CATEGORIES.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        setSearchInput("");
+                        navigate({ search: { category: cat } });
+                      }}
+                      className="rounded-full border border-border bg-secondary/50 px-3 py-1.5 text-sm font-medium hover:border-primary/50 hover:bg-primary/10 hover:text-primary transition-colors"
+                    >
+                      {cat}
+                    </button>
+                  ))}
               </div>
               <Button variant="ghost" className="mt-4" onClick={clearAll}>
                 {query ? "Clear search" : "Reset filters"}

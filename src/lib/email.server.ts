@@ -45,7 +45,13 @@ export interface OrderEmailData {
   customerEmail: string;
   phone: string;
   paymentMethod: "mpesa" | "card";
-  items: { name: string; brand: string; variant: string | null; quantity: number; total_price: number }[];
+  items: {
+    name: string;
+    brand: string;
+    variant: string | null;
+    quantity: number;
+    total_price: number;
+  }[];
   subtotal: number;
   discount: number;
   discountCode: string | null;

@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import type { Product } from "./types";
 
@@ -38,9 +31,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const toggle = useCallback((product: Product) => {
     setItems((prev) => {
       const exists = prev.some((p) => p.id === product.id);
-      const next = exists
-        ? prev.filter((p) => p.id !== product.id)
-        : [...prev, product];
+      const next = exists ? prev.filter((p) => p.id !== product.id) : [...prev, product];
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       if (exists) {
         toast("Removed from wishlist");

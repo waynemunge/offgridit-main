@@ -36,8 +36,7 @@ export function CountdownTimer({ endsAt }: { endsAt: string }) {
   return (
     <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-destructive/10 px-3 py-2 text-sm font-semibold text-destructive">
       <Clock className="h-4 w-4 shrink-0" />
-      Flash sale ends in{" "}
-      <span className="font-mono">{display}</span>
+      Flash sale ends in <span className="font-mono">{display}</span>
     </div>
   );
 }

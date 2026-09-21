@@ -96,9 +96,7 @@ function Home() {
                 </Link>
               </Button>
               <Button variant="outline" size="xl" asChild>
-                <Link to="/shop">
-                  See all deals
-                </Link>
+                <Link to="/shop">See all deals</Link>
               </Button>
             </div>
           </div>
