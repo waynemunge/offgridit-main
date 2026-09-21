@@ -23,7 +23,10 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const db = await requireAdmin(context.userId);
-    const { error } = await db.from("orders").update({ status: data.status }).eq("id", data.orderId);
+    const { error } = await db
+      .from("orders")
+      .update({ status: data.status })
+      .eq("id", data.orderId);
     if (error) throw error;
     return { success: true };
   });
@@ -61,11 +64,7 @@ export const adminSaveProduct = createServerFn({ method: "POST" })
       if (error) throw error;
       return product;
     }
-    const { data: product, error } = await db
-      .from("products")
-      .insert(fields)
-      .select()
-      .single();
+    const { data: product, error } = await db.from("products").insert(fields).select().single();
     if (error) throw error;
     return product;
   });
@@ -76,15 +75,15 @@ export const adminBulkUpdateStock = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const db = await requireAdmin(context.userId);
     await Promise.all(
-      data.map((item) =>
-        db.from("products").update({ stock: item.stock }).eq("id", item.id),
-      ),
+      data.map((item) => db.from("products").update({ stock: item.stock }).eq("id", item.id)),
     );
     // Notify back-in-stock subscribers for products that now have stock
     const restocked = data.filter((item) => item.stock > 0).map((item) => item.id);
     if (restocked.length) {
       const { sendRestockEmails } = await import("../email.server");
-      await sendRestockEmails(restocked).catch((err) => console.error("Restock emails failed:", err));
+      await sendRestockEmails(restocked).catch((err) =>
+        console.error("Restock emails failed:", err),
+      );
     }
     return { updated: data.length };
   });
@@ -126,16 +125,19 @@ export const adminGetCustomers = createServerFn({ method: "POST" })
     if (!orders?.length) return [];
 
     // Group by email (covers both guest and signed-in orders)
-    const map: Record<string, {
-      email: string;
-      full_name: string;
-      phone: string;
-      user_id: string | null;
-      order_count: number;
-      total_spend: number;
-      first_order_at: string;
-      last_order_at: string;
-    }> = {};
+    const map: Record<
+      string,
+      {
+        email: string;
+        full_name: string;
+        phone: string;
+        user_id: string | null;
+        order_count: number;
+        total_spend: number;
+        first_order_at: string;
+        last_order_at: string;
+      }
+    > = {};
 
     for (const o of orders) {
       const key = o.email.toLowerCase();

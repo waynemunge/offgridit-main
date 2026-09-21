@@ -20,7 +20,13 @@ const WHATSAPP_URL = "https://wa.me/254702699933";
 const FULFILMENT_NOTE =
   "Pickup or delivery is arranged with you by call or WhatsApp after you order — nothing extra is charged here.";
 
-type AppliedCode = { id: string; code: string; discount: number; type: "percentage" | "fixed"; value: number };
+type AppliedCode = {
+  id: string;
+  code: string;
+  discount: number;
+  type: "percentage" | "fixed";
+  value: number;
+};
 type PlacedOrder = { orderId: string; total: number; method: "mpesa" | "card" };
 
 function Checkout() {
@@ -41,9 +47,13 @@ function Checkout() {
     if (!couponInput.trim()) return;
     setApplyingCoupon(true);
     try {
-      const result = await validateDiscountCode({ data: { code: couponInput, orderTotal: subtotal } });
+      const result = await validateDiscountCode({
+        data: { code: couponInput, orderTotal: subtotal },
+      });
       setAppliedCode(result);
-      toast.success(`Code applied — ${result.type === "percentage" ? `${result.value}%` : formatKES(result.value)} off!`);
+      toast.success(
+        `Code applied — ${result.type === "percentage" ? `${result.value}%` : formatKES(result.value)} off!`,
+      );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Invalid code");
     } finally {
@@ -51,7 +61,10 @@ function Checkout() {
     }
   };
 
-  const removeCoupon = () => { setAppliedCode(null); setCouponInput(""); };
+  const removeCoupon = () => {
+    setAppliedCode(null);
+    setCouponInput("");
+  };
 
   const submitOrder = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -98,12 +111,16 @@ function Checkout() {
         <p className="mt-2 font-mono text-lg text-primary">#{ref}</p>
         <p className="mt-4 text-muted-foreground">
           We'll call or WhatsApp you shortly to confirm your order,{" "}
-          {placed.method === "mpesa" ? "share the M-Pesa payment details" : "arrange card payment"} and
-          agree on pickup or delivery. A confirmation has been sent to your email.
+          {placed.method === "mpesa" ? "share the M-Pesa payment details" : "arrange card payment"}{" "}
+          and agree on pickup or delivery. A confirmation has been sent to your email.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Button variant="hero" size="lg" asChild>
-            <a href={`${WHATSAPP_URL}?text=${encodeURIComponent(waText)}`} target="_blank" rel="noopener noreferrer">
+            <a
+              href={`${WHATSAPP_URL}?text=${encodeURIComponent(waText)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <MessageCircle className="h-5 w-5" /> Chat on WhatsApp
             </a>
           </Button>
@@ -138,7 +155,13 @@ function Checkout() {
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="checkout-name">Full name</Label>
-                <Input id="checkout-name" name="name" autoComplete="name" maxLength={100} required />
+                <Input
+                  id="checkout-name"
+                  name="name"
+                  autoComplete="name"
+                  maxLength={100}
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="checkout-phone">Phone (M-Pesa / WhatsApp)</Label>
@@ -155,7 +178,13 @@ function Checkout() {
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="checkout-email">Email</Label>
-                <Input id="checkout-email" name="email" type="email" autoComplete="email" required />
+                <Input
+                  id="checkout-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                />
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="checkout-notes">Notes</Label>
@@ -188,7 +217,9 @@ function Checkout() {
                 </span>
                 <span>
                   <span className="block font-medium">M-Pesa</span>
-                  <span className="block text-xs text-muted-foreground">Details sent after you order</span>
+                  <span className="block text-xs text-muted-foreground">
+                    Details sent after you order
+                  </span>
                 </span>
               </button>
               <button
@@ -212,9 +243,15 @@ function Checkout() {
               No payment is taken on this page. After you place your order we'll call or WhatsApp
               you to confirm it and{" "}
               {method === "mpesa" ? (
-                <>share the M-Pesa details for <span className="font-semibold text-foreground">{formatKES(total)}</span>.</>
+                <>
+                  share the M-Pesa details for{" "}
+                  <span className="font-semibold text-foreground">{formatKES(total)}</span>.
+                </>
               ) : (
-                <>arrange card payment of <span className="font-semibold text-foreground">{formatKES(total)}</span>.</>
+                <>
+                  arrange card payment of{" "}
+                  <span className="font-semibold text-foreground">{formatKES(total)}</span>.
+                </>
               )}
             </p>
           </section>
@@ -265,7 +302,13 @@ function Checkout() {
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), applyCoupon())}
                   className="h-9 text-sm uppercase"
                 />
-                <Button type="button" variant="outline" size="sm" onClick={applyCoupon} disabled={applyingCoupon || !couponInput.trim()}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={applyCoupon}
+                  disabled={applyingCoupon || !couponInput.trim()}
+                >
                   {applyingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
                 </Button>
               </div>

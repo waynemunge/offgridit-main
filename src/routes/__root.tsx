@@ -107,11 +107,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "OffGridIt — Premium Gadgets & Tech in Kenya" },
-      { name: "description", content: "OffGridIt E-commerce Hub is a modern online store for tech gadgets." },
-      { property: "og:description", content: "OffGridIt E-commerce Hub is a modern online store for tech gadgets." },
-      { name: "twitter:description", content: "OffGridIt E-commerce Hub is a modern online store for tech gadgets." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/54a24f9c-49fc-43df-b1bf-03670598f3ee/id-preview-371e2193--27bdf4c0-2b6d-4b69-b511-9e6bf97fc0b5.lovable.app-1781179928048.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/54a24f9c-49fc-43df-b1bf-03670598f3ee/id-preview-371e2193--27bdf4c0-2b6d-4b69-b511-9e6bf97fc0b5.lovable.app-1781179928048.png" },
+      {
+        name: "description",
+        content: "OffGridIt E-commerce Hub is a modern online store for tech gadgets.",
+      },
+      {
+        property: "og:description",
+        content: "OffGridIt E-commerce Hub is a modern online store for tech gadgets.",
+      },
+      {
+        name: "twitter:description",
+        content: "OffGridIt E-commerce Hub is a modern online store for tech gadgets.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/54a24f9c-49fc-43df-b1bf-03670598f3ee/id-preview-371e2193--27bdf4c0-2b6d-4b69-b511-9e6bf97fc0b5.lovable.app-1781179928048.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/54a24f9c-49fc-43df-b1bf-03670598f3ee/id-preview-371e2193--27bdf4c0-2b6d-4b69-b511-9e6bf97fc0b5.lovable.app-1781179928048.png",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -159,18 +176,20 @@ function RootComponent() {
             <CartProvider>
               <WishlistProvider>
                 <CompareProvider>
-                <TooltipProvider delayDuration={400}>
-                  <div className="flex min-h-screen flex-col">
-                    {!isAdmin && <Header />}
-                    <main className="flex-1"><Outlet /></main>
-                    {!isAdmin && <Footer />}
-                  </div>
-                  {!isAdmin && <CartDrawer />}
-                  {!isAdmin && <WhatsAppButton />}
-                  {!isAdmin && <CompareBar />}
-                  <AuthModal />
-                  <Toaster position="top-center" richColors />
-                </TooltipProvider>
+                  <TooltipProvider delayDuration={400}>
+                    <div className="flex min-h-screen flex-col">
+                      {!isAdmin && <Header />}
+                      <main className="flex-1">
+                        <Outlet />
+                      </main>
+                      {!isAdmin && <Footer />}
+                    </div>
+                    {!isAdmin && <CartDrawer />}
+                    {!isAdmin && <WhatsAppButton />}
+                    {!isAdmin && <CompareBar />}
+                    <AuthModal />
+                    <Toaster position="top-center" richColors />
+                  </TooltipProvider>
                 </CompareProvider>
               </WishlistProvider>
             </CartProvider>

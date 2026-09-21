@@ -5,7 +5,8 @@ function normalize(row: any): Product {
   return {
     ...row,
     price_kes: Number(row.price_kes),
-    compare_at_price_kes: row.compare_at_price_kes != null ? Number(row.compare_at_price_kes) : null,
+    compare_at_price_kes:
+      row.compare_at_price_kes != null ? Number(row.compare_at_price_kes) : null,
     rating: Number(row.rating),
     images: Array.isArray(row.images) ? row.images : [],
     specs: row.specs && typeof row.specs === "object" ? row.specs : {},

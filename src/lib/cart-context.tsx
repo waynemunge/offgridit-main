@@ -81,7 +81,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
             ...r.product,
             price_kes: Number(r.product.price_kes),
             compare_at_price_kes:
-              r.product.compare_at_price_kes != null ? Number(r.product.compare_at_price_kes) : null,
+              r.product.compare_at_price_kes != null
+                ? Number(r.product.compare_at_price_kes)
+                : null,
             rating: Number(r.product.rating),
             images: Array.isArray(r.product.images) ? r.product.images : [],
             specs: r.product.specs ?? {},
@@ -114,13 +116,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     })();
   }, [user]);
 
-  const persist = useCallback(
-    (next: CartLine[]) => {
-      setLines(next);
-      saveLocal(next);
-    },
-    [],
-  );
+  const persist = useCallback((next: CartLine[]) => {
+    setLines(next);
+    saveLocal(next);
+  }, []);
 
   const dbUpsert = useCallback(
     async (productId: string, quantity: number) => {
@@ -149,7 +148,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const existing = prev.find((l) => l.product.id === product.id);
         const nextQty = Math.min((existing?.quantity ?? 0) + quantity, Math.max(product.stock, 1));
         const next = existing
-          ? prev.map((l) => (l.product.id === product.id ? { ...l, quantity: nextQty, variant: variant ?? l.variant } : l))
+          ? prev.map((l) =>
+              l.product.id === product.id
+                ? { ...l, quantity: nextQty, variant: variant ?? l.variant }
+                : l,
+            )
           : [...prev, { product, quantity: nextQty, variant }];
         saveLocal(next);
         dbUpsert(product.id, nextQty);

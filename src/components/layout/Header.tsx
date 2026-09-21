@@ -1,15 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import {
-  Heart,
-  Menu,
-  Moon,
-  Search,
-  ShoppingCart,
-  Sun,
-  User as UserIcon,
-  X,
-} from "lucide-react";
+import { Heart, Menu, Moon, Search, ShoppingCart, Sun, User as UserIcon, X } from "lucide-react";
 import { useTheme } from "@/lib/theme-context";
 import { useAuth } from "@/lib/auth-context";
 import { useAuthModal } from "@/lib/auth-modal";
@@ -60,7 +51,10 @@ export function Header() {
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
 
-        <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold tracking-tight">
+        <Link
+          to="/"
+          className="flex items-center gap-2 font-display text-lg font-bold tracking-tight"
+        >
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
             O
           </span>
@@ -106,7 +100,13 @@ export function Header() {
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Wishlist" className="relative" asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Wishlist"
+                className="relative"
+                asChild
+              >
                 <Link to="/wishlist">
                   <Heart className="h-5 w-5" />
                   {wishCount > 0 && (

@@ -45,10 +45,15 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
         <button
           aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
-          onClick={(e) => { e.preventDefault(); toggle(product); }}
+          onClick={(e) => {
+            e.preventDefault();
+            toggle(product);
+          }}
           className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-background/80 backdrop-blur-sm transition-colors hover:bg-background"
         >
-          <Heart className={`h-4 w-4 transition-colors ${wished ? "fill-destructive text-destructive" : "text-muted-foreground"}`} />
+          <Heart
+            className={`h-4 w-4 transition-colors ${wished ? "fill-destructive text-destructive" : "text-muted-foreground"}`}
+          />
         </button>
       </Link>
 

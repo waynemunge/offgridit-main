@@ -35,7 +35,11 @@ export function CompareProvider({ children }: { children: ReactNode }) {
       } else {
         next = [...prev, product];
       }
-      try { localStorage.setItem(KEY, JSON.stringify(next)); } catch {}
+      try {
+        localStorage.setItem(KEY, JSON.stringify(next));
+      } catch {
+        /* storage unavailable (private mode) */
+      }
       return next;
     });
   }, []);
@@ -44,7 +48,11 @@ export function CompareProvider({ children }: { children: ReactNode }) {
 
   const clear = useCallback(() => {
     setItems([]);
-    try { localStorage.removeItem(KEY); } catch {}
+    try {
+      localStorage.removeItem(KEY);
+    } catch {
+      /* storage unavailable (private mode) */
+    }
   }, []);
 
   return (

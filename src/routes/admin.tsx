@@ -21,14 +21,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import {
-  Bar,
-  BarChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -63,12 +56,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   Table,
   TableBody,
@@ -179,7 +167,10 @@ function AdminGate() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) { setIsAdmin(false); return; }
+    if (!user) {
+      setIsAdmin(false);
+      return;
+    }
     supabase
       .from("profiles")
       .select("is_admin")
@@ -214,7 +205,9 @@ function AdminGate() {
 // ── Dashboard ────────────────────────────────────────────────────────────────
 
 function AdminDashboard() {
-  const [tab, setTab] = useState<"overview" | "orders" | "customers" | "products" | "codes">("overview");
+  const [tab, setTab] = useState<"overview" | "orders" | "customers" | "products" | "codes">(
+    "overview",
+  );
 
   return (
     <div className="container-px mx-auto max-w-7xl py-8">
@@ -224,18 +217,22 @@ function AdminDashboard() {
           <p className="mt-1 text-sm text-muted-foreground">Manage orders and products</p>
         </div>
         <Button variant="ghost" size="sm" asChild>
-          <Link to="/"><ArrowLeft className="h-4 w-4" /> Back to store</Link>
+          <Link to="/">
+            <ArrowLeft className="h-4 w-4" /> Back to store
+          </Link>
         </Button>
       </div>
 
       <div className="mb-6 flex gap-2 border-b border-border">
-        {([
-          { key: "overview", label: "Overview", icon: LayoutDashboard },
-          { key: "orders", label: "Orders", icon: ShoppingBag },
-          { key: "customers", label: "Customers", icon: Users },
-          { key: "products", label: "Products", icon: Package },
-          { key: "codes", label: "Discount codes", icon: Tag },
-        ] as const).map(({ key, label, icon: Icon }) => (
+        {(
+          [
+            { key: "overview", label: "Overview", icon: LayoutDashboard },
+            { key: "orders", label: "Orders", icon: ShoppingBag },
+            { key: "customers", label: "Customers", icon: Users },
+            { key: "products", label: "Products", icon: Package },
+            { key: "codes", label: "Discount codes", icon: Tag },
+          ] as const
+        ).map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             onClick={() => setTab(key)}
@@ -303,14 +300,17 @@ function OverviewPanel() {
         }
         map[item.product_name].units += item.quantity;
       });
-      return Object.values(map).sort((a, b) => b.units - a.units).slice(0, 5);
+      return Object.values(map)
+        .sort((a, b) => b.units - a.units)
+        .slice(0, 5);
     },
   });
 
   const now = new Date();
   const active = orders.filter((o) => o.status !== "cancelled");
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay());
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   const sum = (list: typeof active) => list.reduce((s, o) => s + Number(o.total_kes), 0);
@@ -324,12 +324,20 @@ function OverviewPanel() {
   const pending = orders.filter((o) => o.status === "pending").length;
 
   const kpis = [
-    { label: "All-time revenue", value: formatKES(totalRevenue), sub: `${active.length} paid orders` },
+    {
+      label: "All-time revenue",
+      value: formatKES(totalRevenue),
+      sub: `${active.length} paid orders`,
+    },
     { label: "This month", value: formatKES(monthRevenue), sub: "revenue" },
     { label: "This week", value: formatKES(weekRevenue), sub: "revenue" },
     { label: "Today", value: formatKES(todayRevenue), sub: "revenue" },
     { label: "Avg order value", value: formatKES(avgOrder), sub: "per order" },
-    { label: "Pending payment", value: String(pending), sub: pending ? "need attention" : "all clear" },
+    {
+      label: "Pending payment",
+      value: String(pending),
+      sub: pending ? "need attention" : "all clear",
+    },
   ];
 
   const monthlyChart = Array.from({ length: 6 }, (_, i) => {
@@ -337,7 +345,10 @@ function OverviewPanel() {
     const end = new Date(now.getFullYear(), now.getMonth() - (5 - i) + 1, 1);
     const label = start.toLocaleString("en-KE", { month: "short" });
     const revenue = active
-      .filter((o) => { const t = new Date(o.created_at); return t >= start && t < end; })
+      .filter((o) => {
+        const t = new Date(o.created_at);
+        return t >= start && t < end;
+      })
       .reduce((s, o) => s + Number(o.total_kes), 0);
     return { month: label, revenue };
   });
@@ -345,7 +356,9 @@ function OverviewPanel() {
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-24 rounded-2xl" />
+        ))}
       </div>
     );
   }
@@ -355,7 +368,9 @@ function OverviewPanel() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {kpis.map((k) => (
           <div key={k.label} className="rounded-2xl border border-border bg-card p-5">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{k.label}</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              {k.label}
+            </p>
             <p className="mt-2 text-2xl font-bold">{k.value}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">{k.sub}</p>
           </div>
@@ -363,7 +378,9 @@ function OverviewPanel() {
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-6">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Revenue — last 6 months</h2>
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Revenue — last 6 months
+        </h2>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={monthlyChart} barSize={36}>
             <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
@@ -372,7 +389,7 @@ function OverviewPanel() {
               tickLine={false}
               width={48}
               tick={{ fontSize: 11 }}
-              tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)}
+              tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
             />
             <Tooltip
               formatter={(v: number) => [formatKES(v), "Revenue"]}
@@ -392,11 +409,15 @@ function OverviewPanel() {
 
       {topProducts.length > 0 && (
         <div className="rounded-2xl border border-border bg-card p-6">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Top products by units sold</h2>
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            Top products by units sold
+          </h2>
           <div className="space-y-3">
             {topProducts.map((p, i) => (
               <div key={p.name} className="flex items-center gap-3 text-sm">
-                <span className="w-6 text-center text-xs font-bold text-muted-foreground">#{i + 1}</span>
+                <span className="w-6 text-center text-xs font-bold text-muted-foreground">
+                  #{i + 1}
+                </span>
                 <div className="flex-1 min-w-0">
                   <p className="truncate font-medium">{p.name}</p>
                   <p className="text-xs text-muted-foreground">{p.brand}</p>
@@ -410,8 +431,12 @@ function OverviewPanel() {
 
       {/* Downloads */}
       <div className="rounded-2xl border border-border bg-card p-6">
-        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Download reports</h2>
-        <p className="mb-4 text-xs text-muted-foreground">Export data as CSV — opens in Excel, Google Sheets, etc.</p>
+        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Download reports
+        </h2>
+        <p className="mb-4 text-xs text-muted-foreground">
+          Export data as CSV — opens in Excel, Google Sheets, etc.
+        </p>
         <div className="flex flex-wrap gap-3">
           <Button
             variant="outline"
@@ -419,11 +444,25 @@ function OverviewPanel() {
             onClick={async () => {
               const { data } = await supabase
                 .from("orders")
-                .select("id, created_at, full_name, email, phone, city, payment_method, status, subtotal_kes, delivery_fee_kes, total_kes")
+                .select(
+                  "id, created_at, full_name, email, phone, city, payment_method, status, subtotal_kes, delivery_fee_kes, total_kes",
+                )
                 .order("created_at", { ascending: false });
               if (!data) return;
               downloadCSV(`offgridit-orders-${new Date().toISOString().slice(0, 10)}.csv`, [
-                ["Order ID", "Date", "Customer", "Email", "Phone", "City", "Payment", "Status", "Subtotal (KES)", "Shipping (KES)", "Total (KES)"],
+                [
+                  "Order ID",
+                  "Date",
+                  "Customer",
+                  "Email",
+                  "Phone",
+                  "City",
+                  "Payment",
+                  "Status",
+                  "Subtotal (KES)",
+                  "Shipping (KES)",
+                  "Total (KES)",
+                ],
                 ...data.map((o) => [
                   o.id,
                   new Date(o.created_at).toLocaleDateString("en-KE"),
@@ -486,10 +525,7 @@ function CustomersPanel() {
 
   const q = search.trim().toLowerCase();
   const filtered = customers.filter(
-    (c) =>
-      !q ||
-      c.email.toLowerCase().includes(q) ||
-      (c.full_name ?? "").toLowerCase().includes(q),
+    (c) => !q || c.email.toLowerCase().includes(q) || (c.full_name ?? "").toLowerCase().includes(q),
   );
 
   return (
@@ -510,7 +546,9 @@ function CustomersPanel() {
 
       {isLoading ? (
         <div className="space-y-2">
-          {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-14 w-full" />
+          ))}
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-border">
@@ -537,9 +575,7 @@ function CustomersPanel() {
                   <TableCell>
                     <span className="font-medium">{c.order_count}</span>
                   </TableCell>
-                  <TableCell className="font-semibold">
-                    {formatKES(c.total_spend)}
-                  </TableCell>
+                  <TableCell className="font-semibold">{formatKES(c.total_spend)}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {new Date(c.last_order_at).toLocaleDateString("en-KE")}
                   </TableCell>
@@ -582,7 +618,11 @@ function OrdersPanel() {
     }
   };
 
-  const { data: orders = [], isLoading, refetch } = useQuery({
+  const {
+    data: orders = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["admin-orders"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -673,7 +713,9 @@ function OrdersPanel() {
 
       {isLoading ? (
         <div className="space-y-2">
-          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-14 w-full" />
+          ))}
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-border bg-card py-16 text-center text-muted-foreground">
@@ -712,7 +754,9 @@ function OrdersPanel() {
                     <TableCell>
                       <span className="capitalize">{order.payment_method}</span>
                     </TableCell>
-                    <TableCell className="font-semibold">{formatKES(Number(order.total_kes))}</TableCell>
+                    <TableCell className="font-semibold">
+                      {formatKES(Number(order.total_kes))}
+                    </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <Select
                         value={order.status}
@@ -720,13 +764,17 @@ function OrdersPanel() {
                         disabled={updating === order.id}
                       >
                         <SelectTrigger className="h-7 w-32 text-xs">
-                          <span className={`mr-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_COLORS[order.status] ?? ""}`}>
+                          <span
+                            className={`mr-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_COLORS[order.status] ?? ""}`}
+                          >
                             {order.status}
                           </span>
                         </SelectTrigger>
                         <SelectContent>
                           {ORDER_STATUSES.map((s) => (
-                            <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                            <SelectItem key={s} value={s} className="capitalize">
+                              {s}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -740,7 +788,9 @@ function OrdersPanel() {
                       <TableCell colSpan={7} className="bg-secondary/30 p-4">
                         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                           Contact: {order.phone}
-                          {order.address ? ` · Address: ${[order.address, order.city].filter(Boolean).join(", ")}` : ""}
+                          {order.address
+                            ? ` · Address: ${[order.address, order.city].filter(Boolean).join(", ")}`
+                            : ""}
                           {order.delivery_notes ? ` — ${order.delivery_notes}` : ""}
                           {Number(order.discount_kes) > 0
                             ? ` · Discount ${order.discount_code ?? ""} -${formatKES(Number(order.discount_kes))}`
@@ -750,26 +800,41 @@ function OrdersPanel() {
                           {order.order_items.map((item) => (
                             <div key={item.id} className="flex items-center gap-3 text-sm">
                               {item.product_image && (
-                                <img src={item.product_image} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                                <img
+                                  src={item.product_image}
+                                  alt=""
+                                  className="h-10 w-10 rounded-lg object-cover"
+                                />
                               )}
                               <span className="flex-1 font-medium">
                                 {item.product_name}
                                 {item.variant && (
-                                  <span className="ml-1 font-normal text-muted-foreground">· {item.variant}</span>
+                                  <span className="ml-1 font-normal text-muted-foreground">
+                                    · {item.variant}
+                                  </span>
                                 )}
                               </span>
                               <span className="text-muted-foreground">×{item.quantity}</span>
-                              <span className="font-semibold">{formatKES(Number(item.total_price_kes))}</span>
+                              <span className="font-semibold">
+                                {formatKES(Number(item.total_price_kes))}
+                              </span>
                             </div>
                           ))}
                         </div>
-                        <div className="mt-4 border-t border-border pt-4" onClick={(e) => e.stopPropagation()}>
-                          <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Admin notes</p>
+                        <div
+                          className="mt-4 border-t border-border pt-4"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            Admin notes
+                          </p>
                           <Textarea
                             rows={2}
                             placeholder="Internal note (not visible to customer)…"
                             value={notes[order.id] ?? order.admin_notes ?? ""}
-                            onChange={(e) => setNotes((n) => ({ ...n, [order.id]: e.target.value }))}
+                            onChange={(e) =>
+                              setNotes((n) => ({ ...n, [order.id]: e.target.value }))
+                            }
                             className="text-sm"
                           />
                           <Button
@@ -779,7 +844,11 @@ function OrdersPanel() {
                             disabled={savingNotes === order.id}
                             onClick={() => saveNotes(order.id)}
                           >
-                            {savingNotes === order.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save note"}
+                            {savingNotes === order.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              "Save note"
+                            )}
                           </Button>
                         </div>
                       </TableCell>
@@ -813,7 +882,10 @@ function ProductsPanel() {
 
   const saveStock = async () => {
     const changes = Object.entries(stockEdits).map(([id, stock]) => ({ id, stock }));
-    if (!changes.length) { setEditingStock(false); return; }
+    if (!changes.length) {
+      setEditingStock(false);
+      return;
+    }
     setSavingStock(true);
     try {
       await adminBulkUpdateStock({ data: changes });
@@ -840,9 +912,7 @@ function ProductsPanel() {
         .from("product-images")
         .upload(filename, file, { upsert: true });
       if (error) throw error;
-      const { data: urlData } = supabase.storage
-        .from("product-images")
-        .getPublicUrl(data.path);
+      const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(data.path);
       setForm((f) => ({ ...f, images: [...f.images, urlData.publicUrl] }));
       toast.success("Image uploaded");
     } catch {
@@ -853,7 +923,11 @@ function ProductsPanel() {
     }
   };
 
-  const openNew = () => { setForm(EMPTY_FORM); setAddUrl(""); setSheetOpen(true); };
+  const openNew = () => {
+    setForm(EMPTY_FORM);
+    setAddUrl("");
+    setSheetOpen(true);
+  };
   const openEdit = (p: any) => {
     setAddUrl("");
     setForm({
@@ -878,7 +952,10 @@ function ProductsPanel() {
   };
 
   const slugify = (s: string) =>
-    s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
 
   const parseSpecs = (raw: string): Record<string, string> => {
     const specs: Record<string, string> = {};
@@ -905,7 +982,9 @@ function ProductsPanel() {
           category: form.category,
           description: form.description || null,
           price_kes: Number(form.price_kes),
-          compare_at_price_kes: form.compare_at_price_kes ? Number(form.compare_at_price_kes) : null,
+          compare_at_price_kes: form.compare_at_price_kes
+            ? Number(form.compare_at_price_kes)
+            : null,
           images: form.images,
           specs: parseSpecs(form.specs_raw),
           stock: Number(form.stock),
@@ -950,7 +1029,14 @@ function ProductsPanel() {
         <div className="flex gap-2">
           {editingStock ? (
             <>
-              <Button variant="outline" size="sm" onClick={() => { setEditingStock(false); setStockEdits({}); }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setEditingStock(false);
+                  setStockEdits({});
+                }}
+              >
                 Cancel
               </Button>
               <Button variant="hero" size="sm" onClick={saveStock} disabled={savingStock}>
@@ -990,7 +1076,9 @@ function ProductsPanel() {
 
       {isLoading ? (
         <div className="space-y-2">
-          {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-14 w-full" />
+          ))}
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-border">
@@ -1048,16 +1136,25 @@ function ProductsPanel() {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Star className={`h-4 w-4 ${p.is_featured ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+                    <Star
+                      className={`h-4 w-4 ${p.is_featured ? "fill-primary text-primary" : "text-muted-foreground"}`}
+                    />
                   </TableCell>
                   <TableCell>
-                    <span className={`text-xs font-medium ${p.is_on_sale ? "text-success" : "text-muted-foreground"}`}>
+                    <span
+                      className={`text-xs font-medium ${p.is_on_sale ? "text-success" : "text-muted-foreground"}`}
+                    >
                       {p.is_on_sale ? "Yes" : "No"}
                     </span>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(p)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => openEdit(p)}
+                      >
                         <Edit className="h-3.5 w-3.5" />
                       </Button>
                       <Button
@@ -1121,9 +1218,15 @@ function ProductsPanel() {
                   value={form.category}
                   onValueChange={(v) => setForm((f) => ({ ...f, category: v }))}
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    {CATEGORIES.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -1263,7 +1366,11 @@ function ProductsPanel() {
                     disabled={uploading}
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    {uploading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
                     Upload
                   </Button>
                 </div>
@@ -1293,7 +1400,7 @@ function ProductsPanel() {
               <Label>Specs (one per line: Key: Value)</Label>
               <Textarea
                 rows={5}
-                placeholder={"Display: 6.1\" OLED\nRAM: 8GB\nBattery: 3274mAh"}
+                placeholder={'Display: 6.1" OLED\nRAM: 8GB\nBattery: 3274mAh'}
                 value={form.specs_raw}
                 onChange={(e) => setForm((f) => ({ ...f, specs_raw: e.target.value }))}
               />
@@ -1310,7 +1417,9 @@ function ProductsPanel() {
               <label className="flex cursor-pointer items-center gap-2 text-sm">
                 <Switch
                   checked={form.is_on_sale}
-                  onCheckedChange={(v) => setForm((f) => ({ ...f, is_on_sale: v, sale_ends_at: v ? f.sale_ends_at : "" }))}
+                  onCheckedChange={(v) =>
+                    setForm((f) => ({ ...f, is_on_sale: v, sale_ends_at: v ? f.sale_ends_at : "" }))
+                  }
                 />
                 On sale
               </label>
@@ -1450,12 +1559,22 @@ function CodesPanel() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-1">
               <Label>Code</Label>
-              <Input placeholder="SAVE20" value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))} required />
+              <Input
+                placeholder="SAVE20"
+                value={form.code}
+                onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))}
+                required
+              />
             </div>
             <div className="space-y-1">
               <Label>Type</Label>
-              <Select value={form.type} onValueChange={(v) => setForm((f) => ({ ...f, type: v as any }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={form.type}
+                onValueChange={(v) => setForm((f) => ({ ...f, type: v as any }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="percentage">Percentage (%)</SelectItem>
                   <SelectItem value="fixed">Fixed (KES)</SelectItem>
@@ -1464,34 +1583,65 @@ function CodesPanel() {
             </div>
             <div className="space-y-1">
               <Label>{form.type === "percentage" ? "Discount %" : "Discount KES"}</Label>
-              <Input type="number" min="1" placeholder={form.type === "percentage" ? "10" : "500"} value={form.value} onChange={(e) => setForm((f) => ({ ...f, value: e.target.value }))} required />
+              <Input
+                type="number"
+                min="1"
+                placeholder={form.type === "percentage" ? "10" : "500"}
+                value={form.value}
+                onChange={(e) => setForm((f) => ({ ...f, value: e.target.value }))}
+                required
+              />
             </div>
             <div className="space-y-1">
               <Label>Min order (KES)</Label>
-              <Input type="number" min="0" placeholder="0" value={form.min_order_kes} onChange={(e) => setForm((f) => ({ ...f, min_order_kes: e.target.value }))} />
+              <Input
+                type="number"
+                min="0"
+                placeholder="0"
+                value={form.min_order_kes}
+                onChange={(e) => setForm((f) => ({ ...f, min_order_kes: e.target.value }))}
+              />
             </div>
             <div className="space-y-1">
               <Label>Max uses (blank = unlimited)</Label>
-              <Input type="number" min="1" placeholder="—" value={form.max_uses} onChange={(e) => setForm((f) => ({ ...f, max_uses: e.target.value }))} />
+              <Input
+                type="number"
+                min="1"
+                placeholder="—"
+                value={form.max_uses}
+                onChange={(e) => setForm((f) => ({ ...f, max_uses: e.target.value }))}
+              />
             </div>
             <div className="space-y-1">
               <Label>Expiry date (optional)</Label>
-              <Input type="date" value={form.expires_at} onChange={(e) => setForm((f) => ({ ...f, expires_at: e.target.value }))} />
+              <Input
+                type="date"
+                value={form.expires_at}
+                onChange={(e) => setForm((f) => ({ ...f, expires_at: e.target.value }))}
+              />
             </div>
           </div>
           <div className="mt-4 flex gap-2">
             <Button type="submit" variant="hero" size="sm" disabled={creating}>
               {creating && <Loader2 className="h-4 w-4 animate-spin" />} Create
             </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => setShowForm(false)}>Cancel</Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => setShowForm(false)}>
+              Cancel
+            </Button>
           </div>
         </form>
       )}
 
       {isLoading ? (
-        <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}</div>
+        <div className="space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-14 w-full" />
+          ))}
+        </div>
       ) : codes.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card py-16 text-center text-muted-foreground">No codes yet. Create one above.</div>
+        <div className="rounded-2xl border border-border bg-card py-16 text-center text-muted-foreground">
+          No codes yet. Create one above.
+        </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-border">
           <Table>
@@ -1510,9 +1660,14 @@ function CodesPanel() {
               {(codes as DiscountCode[]).map((c) => (
                 <TableRow key={c.id}>
                   <TableCell className="font-mono font-semibold">{c.code}</TableCell>
-                  <TableCell>{c.type === "percentage" ? `${c.value}%` : formatKES(c.value)}</TableCell>
+                  <TableCell>
+                    {c.type === "percentage" ? `${c.value}%` : formatKES(c.value)}
+                  </TableCell>
                   <TableCell>{c.min_order_kes > 0 ? formatKES(c.min_order_kes) : "—"}</TableCell>
-                  <TableCell>{c.uses}{c.max_uses !== null ? ` / ${c.max_uses}` : ""}</TableCell>
+                  <TableCell>
+                    {c.uses}
+                    {c.max_uses !== null ? ` / ${c.max_uses}` : ""}
+                  </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {c.expires_at ? new Date(c.expires_at).toLocaleDateString("en-KE") : "—"}
                   </TableCell>
@@ -1520,7 +1675,12 @@ function CodesPanel() {
                     <Switch checked={c.is_active} onCheckedChange={(v) => toggleCode(c.id, v)} />
                   </TableCell>
                   <TableCell>
-                    <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => deleteCode(c.id)}>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-destructive"
+                      onClick={() => deleteCode(c.id)}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </TableCell>

@@ -50,18 +50,42 @@ export function Footer() {
           <div>
             <h4 className="mb-4 text-sm font-semibold">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/about" className="hover:text-foreground">About us</Link></li>
-              <li><Link to="/contact" className="hover:text-foreground">Contact</Link></li>
-              <li><Link to="/shop" className="hover:text-foreground">All products</Link></li>
+              <li>
+                <Link to="/about" className="hover:text-foreground">
+                  About us
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="hover:text-foreground">
+                  Contact
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop" className="hover:text-foreground">
+                  All products
+                </Link>
+              </li>
             </ul>
           </div>
 
           <div>
             <h4 className="mb-4 text-sm font-semibold">Legal</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link></li>
-              <li><Link to="/terms" className="hover:text-foreground">Terms of Service</Link></li>
-              <li><Link to="/refund" className="hover:text-foreground">Refund Policy</Link></li>
+              <li>
+                <Link to="/privacy" className="hover:text-foreground">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="hover:text-foreground">
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link to="/refund" className="hover:text-foreground">
+                  Refund Policy
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -78,7 +102,9 @@ export function Footer() {
                 placeholder="you@email.com"
                 required
               />
-              <Button type="submit" variant="hero">Join</Button>
+              <Button type="submit" variant="hero">
+                Join
+              </Button>
             </form>
           </div>
         </div>
@@ -86,9 +112,15 @@ export function Footer() {
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
           <p>© {new Date().getFullYear()} OffGridIt. All rights reserved.</p>
           <div className="flex flex-wrap items-center gap-4">
-            <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
-            <Link to="/terms" className="hover:text-foreground">Terms</Link>
-            <Link to="/refund" className="hover:text-foreground">Refunds</Link>
+            <Link to="/privacy" className="hover:text-foreground">
+              Privacy
+            </Link>
+            <Link to="/terms" className="hover:text-foreground">
+              Terms
+            </Link>
+            <Link to="/refund" className="hover:text-foreground">
+              Refunds
+            </Link>
           </div>
         </div>
       </div>

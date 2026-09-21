@@ -4,7 +4,11 @@ export const Route = createFileRoute("/refund")({
   head: () => ({
     meta: [
       { title: "Refund & Returns Policy — OffGridIt" },
-      { name: "description", content: "OffGridIt returns, exchanges and refund policy. Items can be returned within 7 days of delivery." },
+      {
+        name: "description",
+        content:
+          "OffGridIt returns, exchanges and refund policy. Items can be returned within 7 days of delivery.",
+      },
     ],
   }),
   component: RefundPage,
@@ -17,7 +21,6 @@ function RefundPage() {
       <p className="mb-10 text-sm text-muted-foreground">Last updated: June 2025</p>
 
       <div className="space-y-8 text-sm leading-relaxed text-muted-foreground [&_h2]:mb-3 [&_h2]:mt-8 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-foreground [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1">
-
         <p>
           We want you to be fully satisfied with your purchase. If something is not right, we are
           here to help. This policy is designed in accordance with the{" "}
@@ -27,8 +30,8 @@ function RefundPage() {
         <section>
           <h2>1. Return Window</h2>
           <p>
-            You may return most items within <strong className="text-foreground">7 days</strong> of the delivery date.
-            To be eligible, the item must be:
+            You may return most items within <strong className="text-foreground">7 days</strong> of
+            the delivery date. To be eligible, the item must be:
           </p>
           <ul>
             <li>In its original, unopened packaging (for sealed items)</li>
@@ -68,18 +71,36 @@ function RefundPage() {
         <section>
           <h2>4. How to Initiate a Return</h2>
           <ul>
-            <li>Contact us via the <Link to="/contact" className="text-primary underline">Contact page</Link> or WhatsApp with your order ID and reason for return.</li>
-            <li>We will confirm eligibility and provide return instructions within 2 business days.</li>
+            <li>
+              Contact us via the{" "}
+              <Link to="/contact" className="text-primary underline">
+                Contact page
+              </Link>{" "}
+              or WhatsApp with your order ID and reason for return.
+            </li>
+            <li>
+              We will confirm eligibility and provide return instructions within 2 business days.
+            </li>
             <li>Pack the item securely in its original packaging.</li>
-            <li>Drop off or arrange courier delivery to the address provided. Return shipping costs are the customer's responsibility unless the item is faulty.</li>
+            <li>
+              Drop off or arrange courier delivery to the address provided. Return shipping costs
+              are the customer's responsibility unless the item is faulty.
+            </li>
           </ul>
         </section>
 
         <section>
           <h2>5. Refund Processing</h2>
           <ul>
-            <li>Once we receive and inspect the returned item, we will notify you of approval or rejection within 3 business days.</li>
-            <li>Approved refunds are processed within <strong className="text-foreground">5–7 business days</strong> back to the original payment method (M-Pesa or card).</li>
+            <li>
+              Once we receive and inspect the returned item, we will notify you of approval or
+              rejection within 3 business days.
+            </li>
+            <li>
+              Approved refunds are processed within{" "}
+              <strong className="text-foreground">5–7 business days</strong> back to the original
+              payment method (M-Pesa or card).
+            </li>
             <li>Delivery fees are non-refundable unless the return is due to our error.</li>
           </ul>
         </section>
@@ -87,9 +108,9 @@ function RefundPage() {
         <section>
           <h2>6. Exchanges</h2>
           <p>
-            We offer exchanges for a different size, colour, or model where stock is available.
-            If the replacement item is of higher value, you will be charged the difference. If
-            lower, we will refund the difference.
+            We offer exchanges for a different size, colour, or model where stock is available. If
+            the replacement item is of higher value, you will be charged the difference. If lower,
+            we will refund the difference.
           </p>
         </section>
 
@@ -105,11 +126,13 @@ function RefundPage() {
         <section>
           <h2>8. Contact Us</h2>
           <p>
-            For any returns or refund queries, <Link to="/contact" className="text-primary underline">contact us</Link> or
-            reach us on WhatsApp. We aim to resolve all issues promptly and fairly.
+            For any returns or refund queries,{" "}
+            <Link to="/contact" className="text-primary underline">
+              contact us
+            </Link>{" "}
+            or reach us on WhatsApp. We aim to resolve all issues promptly and fairly.
           </p>
         </section>
-
       </div>
     </div>
   );

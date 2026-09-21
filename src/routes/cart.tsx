@@ -28,7 +28,9 @@ function CartPage() {
   return (
     <div className="container-px mx-auto max-w-7xl py-10">
       <h1 className="text-3xl font-bold sm:text-4xl">Your cart</h1>
-      <p className="mt-2 text-muted-foreground">{count} item{count !== 1 && "s"}</p>
+      <p className="mt-2 text-muted-foreground">
+        {count} item{count !== 1 && "s"}
+      </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
         <ul className="space-y-4">

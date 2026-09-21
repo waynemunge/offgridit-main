@@ -116,7 +116,9 @@ function OrdersList({ userId }: { userId: string }) {
           <Package className="h-8 w-8" />
         </div>
         <h1 className="mt-6 text-3xl font-bold">No orders yet</h1>
-        <p className="mt-3 text-muted-foreground">Your order history will appear here once you make a purchase.</p>
+        <p className="mt-3 text-muted-foreground">
+          Your order history will appear here once you make a purchase.
+        </p>
         <Button variant="hero" size="lg" className="mt-8" asChild>
           <Link to="/shop">Browse products</Link>
         </Button>
@@ -131,7 +133,10 @@ function OrdersList({ userId }: { userId: string }) {
         {orders.map((order) => {
           const isOpen = expanded === order.id;
           return (
-            <div key={order.id} className="overflow-hidden rounded-2xl border border-border bg-card">
+            <div
+              key={order.id}
+              className="overflow-hidden rounded-2xl border border-border bg-card"
+            >
               {/* Order header */}
               <button
                 className="flex w-full items-center gap-4 p-5 text-left"
@@ -142,13 +147,17 @@ function OrdersList({ userId }: { userId: string }) {
                     <span className="font-mono text-sm font-semibold">
                       #{order.id.slice(0, 8).toUpperCase()}
                     </span>
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_COLORS[order.status] ?? ""}`}>
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_COLORS[order.status] ?? ""}`}
+                    >
                       {order.status}
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {new Date(order.created_at).toLocaleDateString("en-KE", {
-                      day: "numeric", month: "long", year: "numeric",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
                     })}
                     {" · "}
                     {order.order_items.length} item{order.order_items.length !== 1 ? "s" : ""}
@@ -159,9 +168,11 @@ function OrdersList({ userId }: { userId: string }) {
                 <div className="text-right shrink-0">
                   <p className="font-bold">{formatKES(Number(order.total_kes))}</p>
                 </div>
-                {isOpen
-                  ? <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  : <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />}
+                {isOpen ? (
+                  <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                )}
               </button>
 
               {/* Expanded items */}
@@ -193,11 +204,13 @@ function OrdersList({ userId }: { userId: string }) {
 
                   <dl className="mt-4 space-y-1 border-t border-border pt-4 text-sm">
                     <div className="flex justify-between text-muted-foreground">
-                      <dt>Subtotal</dt><dd>{formatKES(Number(order.subtotal_kes))}</dd>
+                      <dt>Subtotal</dt>
+                      <dd>{formatKES(Number(order.subtotal_kes))}</dd>
                     </div>
                     {Number(order.delivery_fee_kes) > 0 && (
                       <div className="flex justify-between text-muted-foreground">
-                        <dt>Delivery</dt><dd>{formatKES(Number(order.delivery_fee_kes))}</dd>
+                        <dt>Delivery</dt>
+                        <dd>{formatKES(Number(order.delivery_fee_kes))}</dd>
                       </div>
                     )}
                     {Number(order.discount_kes) > 0 && (
@@ -207,7 +220,8 @@ function OrdersList({ userId }: { userId: string }) {
                       </div>
                     )}
                     <div className="flex justify-between font-bold pt-1 text-base">
-                      <dt>Total</dt><dd>{formatKES(Number(order.total_kes))}</dd>
+                      <dt>Total</dt>
+                      <dd>{formatKES(Number(order.total_kes))}</dd>
                     </div>
                   </dl>
 

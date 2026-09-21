@@ -29,9 +29,7 @@ function ComparePage() {
     );
   }
 
-  const specKeys = Array.from(
-    new Set(items.flatMap((p) => Object.keys(p.specs)))
-  );
+  const specKeys = Array.from(new Set(items.flatMap((p) => Object.keys(p.specs))));
 
   const rows: { label: string; values: string[] }[] = [
     { label: "Brand", values: items.map((p) => p.brand) },
@@ -69,22 +67,14 @@ function ComparePage() {
               </th>
               {items.map((p) => (
                 <th key={p.id} className="min-w-52 px-4 py-4 text-left">
-                  <Link
-                    to="/product/$slug"
-                    params={{ slug: p.slug }}
-                    className="group block"
-                  >
+                  <Link to="/product/$slug" params={{ slug: p.slug }} className="group block">
                     <img
                       src={p.images[0] ?? "/images/products/phone-aurora.jpg"}
                       alt={p.name}
                       className="mb-3 h-28 w-28 rounded-xl border border-border object-cover transition-colors group-hover:border-primary/50"
                     />
-                    <p className="font-semibold leading-tight group-hover:text-primary">
-                      {p.name}
-                    </p>
-                    <p className="mt-1 text-lg font-bold text-primary">
-                      {formatKES(p.price_kes)}
-                    </p>
+                    <p className="font-semibold leading-tight group-hover:text-primary">{p.name}</p>
+                    <p className="mt-1 text-lg font-bold text-primary">{formatKES(p.price_kes)}</p>
                   </Link>
                 </th>
               ))}

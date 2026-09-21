@@ -1,7 +1,18 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Bell, Check, ChevronRight, Minus, Plus, ShoppingCart, Star, Trash2, Truck } from "lucide-react";
+import {
+  AlertTriangle,
+  Bell,
+  Check,
+  ChevronRight,
+  Minus,
+  Plus,
+  ShoppingCart,
+  Star,
+  Trash2,
+  Truck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { fetchProductBySlug, productsQueryOptions } from "@/lib/products";
 import { trackProduct, getRecentlyViewed } from "@/lib/recently-viewed";
@@ -40,10 +51,7 @@ export const Route = createFileRoute("/product/$slug")({
         "@type": "Offer",
         priceCurrency: "KES",
         price: p.price_kes,
-        availability:
-          p.stock > 0
-            ? "https://schema.org/InStock"
-            : "https://schema.org/OutOfStock",
+        availability: p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
         url: `https://offgridit.co.ke/product/${p.slug}`,
       },
       ...(p.rating > 0
@@ -74,7 +82,12 @@ export const Route = createFileRoute("/product/$slug")({
             "@type": "BreadcrumbList",
             itemListElement: [
               { "@type": "ListItem", position: 1, name: "Home", item: "https://offgridit.co.ke/" },
-              { "@type": "ListItem", position: 2, name: p.category, item: `https://offgridit.co.ke/shop?category=${encodeURIComponent(p.category)}` },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: p.category,
+                item: `https://offgridit.co.ke/shop?category=${encodeURIComponent(p.category)}`,
+              },
               { "@type": "ListItem", position: 3, name: p.name },
             ],
           }),
@@ -108,9 +121,13 @@ function ProductDetail() {
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>(() =>
-    Object.fromEntries((product.variants ?? []).map((g) => [g.name, g.options[0] ?? ""]))
+    Object.fromEntries((product.variants ?? []).map((g) => [g.name, g.options[0] ?? ""])),
   );
-  const variantLabel = Object.entries(selectedVariants).map(([, v]) => v).filter(Boolean).join(" / ") || undefined;
+  const variantLabel =
+    Object.entries(selectedVariants)
+      .map(([, v]) => v)
+      .filter(Boolean)
+      .join(" / ") || undefined;
   const [recentItems, setRecentItems] = useState(() => getRecentlyViewed(product.id));
 
   useEffect(() => {
@@ -128,10 +145,19 @@ function ProductDetail() {
 
   return (
     <div className="container-px mx-auto max-w-7xl py-8">
-      <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-1.5 text-sm text-muted-foreground">
-        <Link to="/" className="hover:text-foreground">Home</Link>
+      <nav
+        aria-label="Breadcrumb"
+        className="mb-6 flex items-center gap-1.5 text-sm text-muted-foreground"
+      >
+        <Link to="/" className="hover:text-foreground">
+          Home
+        </Link>
         <ChevronRight className="h-3.5 w-3.5 shrink-0" />
-        <Link to="/shop" search={{ category: product.category } as any} className="hover:text-foreground">
+        <Link
+          to="/shop"
+          search={{ category: product.category } as any}
+          className="hover:text-foreground"
+        >
           {product.category}
         </Link>
         <ChevronRight className="h-3.5 w-3.5 shrink-0" />
@@ -204,7 +230,9 @@ function ProductDetail() {
                 <div key={group.name}>
                   <p className="mb-2 text-sm font-semibold">
                     {group.name}:{" "}
-                    <span className="font-normal text-muted-foreground">{selectedVariants[group.name]}</span>
+                    <span className="font-normal text-muted-foreground">
+                      {selectedVariants[group.name]}
+                    </span>
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {group.options.map((opt) => (
@@ -319,8 +347,12 @@ function ProductDetail() {
                   />
                 </div>
                 <div className="flex flex-col gap-1 p-3">
-                  <span className="text-xs uppercase tracking-wide text-muted-foreground">{item.brand}</span>
-                  <span className="line-clamp-2 text-sm font-semibold leading-tight">{item.name}</span>
+                  <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                    {item.brand}
+                  </span>
+                  <span className="line-clamp-2 text-sm font-semibold leading-tight">
+                    {item.name}
+                  </span>
                   <span className="mt-1 text-sm font-bold">{formatKES(item.price_kes)}</span>
                 </div>
               </Link>
@@ -419,9 +451,7 @@ function StarInput({ value, onChange }: { value: number; onChange: (v: number) =
         >
           <Star
             className={`h-6 w-6 transition-colors ${
-              s <= (hovered || value)
-                ? "fill-primary text-primary"
-                : "text-muted-foreground"
+              s <= (hovered || value) ? "fill-primary text-primary" : "text-muted-foreground"
             }`}
           />
         </button>
@@ -495,9 +525,7 @@ function ReviewsSection({ productId }: { productId: string }) {
     onError: () => toast.error("Failed to delete review"),
   });
 
-  const avgRating = reviews.length
-    ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
-    : 0;
+  const avgRating = reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
 
   return (
     <section className="mt-20">
@@ -524,7 +552,10 @@ function ReviewsSection({ productId }: { productId: string }) {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (rating === 0) { toast.error("Please select a star rating"); return; }
+                if (rating === 0) {
+                  toast.error("Please select a star rating");
+                  return;
+                }
                 submitMutation.mutate();
               }}
               className="space-y-4"
@@ -573,7 +604,9 @@ function ReviewsSection({ productId }: { productId: string }) {
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   <span>
                     {new Date(review.created_at).toLocaleDateString("en-KE", {
-                      day: "numeric", month: "short", year: "numeric",
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
                     })}
                   </span>
                   {user?.id === review.user_id && (

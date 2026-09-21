@@ -19,9 +19,7 @@ function WishlistPage() {
           <Heart className="h-8 w-8" />
         </div>
         <h1 className="mt-6 text-3xl font-bold">Your wishlist is empty</h1>
-        <p className="mt-3 text-muted-foreground">
-          Tap the heart on any product to save it here.
-        </p>
+        <p className="mt-3 text-muted-foreground">Tap the heart on any product to save it here.</p>
         <Button variant="hero" size="lg" className="mt-8" asChild>
           <Link to="/shop">Browse products</Link>
         </Button>
