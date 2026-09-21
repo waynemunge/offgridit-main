@@ -32,9 +32,12 @@ import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/product/$slug")({
   loader: async ({ params, context }) => {
-    const product = await context.queryClient.ensureQueryData({
-      queryKey: ["product", params.slug],
+    // Under the "products" key so anything that invalidates products (an order,
+    // an admin stock change) also refreshes this page's stock and price.
+    const product = await context.queryClient.fetchQuery({
+      queryKey: ["products", "by-slug", params.slug],
       queryFn: () => fetchProductBySlug(params.slug),
+      staleTime: 30_000,
     });
     if (!product) throw notFound();
     return product;
