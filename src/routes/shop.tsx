@@ -40,7 +40,8 @@ export interface ShopSearch {
   brand?: string;
   max?: number;
   sort?: SortValue;
-  sale?: "1";
+  /** Deals only. Old links used sale=1, which still works. */
+  sale?: boolean;
 }
 
 const text = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : undefined);
@@ -57,7 +58,7 @@ export const Route = createFileRoute("/shop")({
       brand: text(search.brand),
       max: Number.isFinite(max) && max > 0 ? max : undefined,
       sort: sort === "featured" ? undefined : sort,
-      sale: search.sale === "1" || search.sale === 1 ? "1" : undefined,
+      sale: [true, "true", 1, "1"].includes(search.sale as never) ? true : undefined,
     };
   },
   head: ({ match }) => {
@@ -92,7 +93,7 @@ function Shop() {
   const selectedCats = useMemo(() => splitList(search.category), [search.category]);
   const selectedBrands = useMemo(() => splitList(search.brand), [search.brand]);
   const sort: SortValue = search.sort ?? "featured";
-  const onlySale = search.sale === "1";
+  const onlySale = search.sale === true;
 
   // The slider tops out at the most expensive product, so nothing is hidden by default.
   const priceCeiling = useMemo(() => {

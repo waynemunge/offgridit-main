@@ -98,7 +98,7 @@ function Home() {
                 </Link>
               </Button>
               <Button variant="outline" size="xl" asChild>
-                <Link to="/shop" search={{ sale: "1" }}>
+                <Link to="/shop" search={{ sale: true }}>
                   See all deals
                 </Link>
               </Button>
@@ -184,7 +184,7 @@ function Home() {
               <h2 className="mt-1 text-3xl font-bold sm:text-4xl">Deals &amp; savings</h2>
             </div>
             <Button variant="hero" asChild>
-              <Link to="/shop" search={{ sale: "1" }}>
+              <Link to="/shop" search={{ sale: true }}>
                 See all deals <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
