@@ -27,6 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { CATEGORIES } from "@/lib/types";
 import { formatKES } from "@/lib/format";
+import { NO_INDEX } from "@/lib/site";
 import { productsQueryOptions } from "@/lib/products";
 import {
   adminBulkUpdateStock,
@@ -35,6 +36,8 @@ import {
   adminSaveProduct,
   adminUpdateOrderNotes,
   adminUpdateOrderStatus,
+  ORDER_STATUSES,
+  type OrderStatus,
 } from "@/lib/api/admin.functions";
 import {
   adminCreateDiscountCode,
@@ -77,7 +80,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — OffGridIt" }] }),
+  head: () => ({ meta: [{ title: "Admin — OffGridIt" }, NO_INDEX] }),
   component: AdminGate,
 });
 
@@ -156,8 +159,6 @@ const STATUS_COLORS: Record<string, string> = {
   delivered: "bg-success/15 text-success",
   cancelled: "bg-destructive/15 text-destructive",
 };
-
-const ORDER_STATUSES = ["pending", "paid", "processing", "shipped", "delivered", "cancelled"];
 
 // ── Access gate ──────────────────────────────────────────────────────────────
 
@@ -599,6 +600,7 @@ function CustomersPanel() {
 // ── Orders panel ─────────────────────────────────────────────────────────────
 
 function OrdersPanel() {
+  const qc = useQueryClient();
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -657,11 +659,20 @@ function OrdersPanel() {
   const updateStatus = async (orderId: string, status: string) => {
     setUpdating(orderId);
     try {
-      await adminUpdateOrderStatus({ data: { orderId, status: status as any } });
+      const { stock } = await adminUpdateOrderStatus({
+        data: { orderId, status: status as OrderStatus },
+      });
       await refetch();
-      toast.success("Order status updated");
-    } catch {
-      toast.error("Failed to update status");
+      qc.invalidateQueries({ queryKey: ["products"] });
+      toast.success(
+        stock === "restocked"
+          ? "Order cancelled — items returned to stock"
+          : stock === "reserved"
+            ? "Order reopened — items taken from stock"
+            : "Order status updated",
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update status");
     } finally {
       setUpdating(null);
     }

@@ -3,19 +3,32 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
 } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./auth-context";
+import { productsQueryOptions } from "./products";
 import type { CartLine, Product } from "./types";
 
+export type LineStatus = "ok" | "sold-out" | "unavailable";
+
+export interface CartViewLine extends CartLine {
+  /** Most the customer can have of this product right now. */
+  maxQty: number;
+  status: LineStatus;
+}
+
 interface CartCtx {
-  lines: CartLine[];
+  lines: CartViewLine[];
   count: number;
   subtotal: number;
+  /** True when a line is sold out or no longer sold — checkout must wait until it's removed. */
+  hasUnavailable: boolean;
   isOpen: boolean;
   setOpen: (open: boolean) => void;
   addItem: (product: Product, quantity?: number, variant?: string) => void;
@@ -45,15 +58,29 @@ function saveLocal(lines: CartLine[]) {
   }
 }
 
+interface CartItemRow {
+  quantity: number;
+  product:
+    | (Omit<Product, "price_kes" | "compare_at_price_kes" | "rating"> & {
+        price_kes: number | string;
+        compare_at_price_kes: number | string | null;
+        rating: number | string;
+      })
+    | null;
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [lines, setLines] = useState<CartLine[]>([]);
+  const [stored, setStored] = useState<CartLine[]>([]);
   const [isOpen, setOpen] = useState(false);
   const mergedFor = useRef<string | null>(null);
+  // Live catalogue: the cart shows current prices and stock, not what they were
+  // when the item was added. Most pages already load this query.
+  const { data: catalogue } = useQuery(productsQueryOptions);
 
   // initial local load
   useEffect(() => {
-    setLines(loadLocal());
+    setStored(loadLocal());
   }, []);
 
   // Sync with backend when user signs in / out
@@ -73,22 +100,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
         .eq("user_id", user.id);
       if (error) return;
 
-      const dbLines: CartLine[] = (data ?? [])
-        .filter((r: any) => r.product)
-        .map((r: any) => ({
-          quantity: r.quantity,
-          product: {
-            ...r.product,
-            price_kes: Number(r.product.price_kes),
-            compare_at_price_kes:
-              r.product.compare_at_price_kes != null
-                ? Number(r.product.compare_at_price_kes)
-                : null,
-            rating: Number(r.product.rating),
-            images: Array.isArray(r.product.images) ? r.product.images : [],
-            specs: r.product.specs ?? {},
-          },
-        }));
+      const dbLines: CartLine[] = ((data ?? []) as unknown as CartItemRow[])
+        .filter((r) => r.product)
+        .map((r) => {
+          const p = r.product!;
+          return {
+            quantity: r.quantity,
+            product: {
+              ...p,
+              price_kes: Number(p.price_kes),
+              compare_at_price_kes:
+                p.compare_at_price_kes != null ? Number(p.compare_at_price_kes) : null,
+              rating: Number(p.rating),
+              images: Array.isArray(p.images) ? p.images : [],
+              specs: p.specs ?? {},
+              variants: Array.isArray(p.variants) ? p.variants : [],
+            },
+          };
+        });
 
       // merge local into db (local quantities win on overlap)
       const map = new Map<string, CartLine>();
@@ -99,7 +128,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         else map.set(line.product.id, line);
       }
       const merged = Array.from(map.values());
-      setLines(merged);
+      setStored(merged);
       saveLocal(merged);
 
       // persist merged set
@@ -115,11 +144,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
     })();
   }, [user]);
-
-  const persist = useCallback((next: CartLine[]) => {
-    setLines(next);
-    saveLocal(next);
-  }, []);
 
   const dbUpsert = useCallback(
     async (productId: string, quantity: number) => {
@@ -142,49 +166,100 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [user],
   );
 
+  const liveProduct = useCallback((id: string) => catalogue?.find((p) => p.id === id), [catalogue]);
+
+  // Stored lines joined with live product data.
+  const lines = useMemo<CartViewLine[]>(
+    () =>
+      stored.map((line) => {
+        if (!catalogue) return { ...line, maxQty: line.product.stock, status: "ok" as const };
+        const product = liveProduct(line.product.id);
+        if (!product) return { ...line, maxQty: 0, status: "unavailable" as const };
+        return {
+          ...line,
+          product,
+          maxQty: product.stock,
+          status: product.stock > 0 ? ("ok" as const) : ("sold-out" as const),
+        };
+      }),
+    [stored, catalogue, liveProduct],
+  );
+
+  // When stock drops below what's in a cart, bring the quantity down to what's left.
+  useEffect(() => {
+    if (!catalogue) return;
+    const reduced: { name: string; qty: number }[] = [];
+    const next = stored.map((line) => {
+      const stock = liveProduct(line.product.id)?.stock ?? 0;
+      if (stock > 0 && line.quantity > stock) {
+        reduced.push({ name: line.product.name, qty: stock });
+        dbUpsert(line.product.id, stock);
+        return { ...line, quantity: stock };
+      }
+      return line;
+    });
+    if (!reduced.length) return;
+    setStored(next);
+    saveLocal(next);
+    for (const r of reduced) {
+      toast.info(`Only ${r.qty} of ${r.name} left — we've updated your cart.`);
+    }
+  }, [catalogue, stored, liveProduct, dbUpsert]);
+
   const addItem = useCallback(
     (product: Product, quantity = 1, variant?: string) => {
-      setLines((prev) => {
-        const existing = prev.find((l) => l.product.id === product.id);
-        const nextQty = Math.min((existing?.quantity ?? 0) + quantity, Math.max(product.stock, 1));
-        const next = existing
-          ? prev.map((l) =>
-              l.product.id === product.id
-                ? { ...l, quantity: nextQty, variant: variant ?? l.variant }
-                : l,
-            )
-          : [...prev, { product, quantity: nextQty, variant }];
-        saveLocal(next);
-        dbUpsert(product.id, nextQty);
-        return next;
-      });
-      toast.success(`${product.name} added to cart`);
+      const stock = liveProduct(product.id)?.stock ?? product.stock;
+      if (stock <= 0) {
+        toast.error(`${product.name} is sold out.`);
+        return;
+      }
+      const inCart = stored.find((l) => l.product.id === product.id)?.quantity ?? 0;
+      if (inCart >= stock) {
+        toast.info(`You already have all ${stock} of ${product.name} in your cart.`);
+        setOpen(true);
+        return;
+      }
+      const nextQty = Math.min(inCart + quantity, stock);
+      const next = inCart
+        ? stored.map((l) =>
+            l.product.id === product.id
+              ? { ...l, product, quantity: nextQty, variant: variant ?? l.variant }
+              : l,
+          )
+        : [...stored, { product, quantity: nextQty, variant }];
+      setStored(next);
+      saveLocal(next);
+      dbUpsert(product.id, nextQty);
+      if (nextQty < inCart + quantity) {
+        toast.info(`Only ${stock} of ${product.name} available — added ${nextQty - inCart}.`);
+      } else {
+        toast.success(`${product.name} added to cart`);
+      }
       setOpen(true);
     },
-    [dbUpsert],
+    [stored, liveProduct, dbUpsert],
   );
 
   const updateQty = useCallback(
     (productId: string, quantity: number) => {
       if (quantity < 1) return;
-      setLines((prev) => {
-        const next = prev.map((l) =>
-          l.product.id === productId
-            ? { ...l, quantity: Math.min(quantity, Math.max(l.product.stock, 1)) }
-            : l,
-        );
-        saveLocal(next);
-        const line = next.find((l) => l.product.id === productId);
-        if (line) dbUpsert(productId, line.quantity);
-        return next;
-      });
+      const line = stored.find((l) => l.product.id === productId);
+      if (!line) return;
+      const stock = liveProduct(productId)?.stock ?? line.product.stock;
+      const qty = Math.min(quantity, Math.max(stock, 1));
+      if (quantity > qty) toast.info(`Only ${stock} of ${line.product.name} available.`);
+      if (qty === line.quantity) return;
+      const next = stored.map((l) => (l.product.id === productId ? { ...l, quantity: qty } : l));
+      setStored(next);
+      saveLocal(next);
+      dbUpsert(productId, qty);
     },
-    [dbUpsert],
+    [stored, liveProduct, dbUpsert],
   );
 
   const removeItem = useCallback(
     (productId: string) => {
-      setLines((prev) => {
+      setStored((prev) => {
         const next = prev.filter((l) => l.product.id !== productId);
         saveLocal(next);
         return next;
@@ -195,16 +270,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   const clearCart = useCallback(() => {
-    persist([]);
-    if (user) supabase.from("cart_items").delete().eq("user_id", user.id);
-  }, [persist, user]);
+    setStored([]);
+    saveLocal([]);
+    // Supabase queries only run once awaited/then'd — without this the saved cart
+    // was never cleared and came back on the next sign-in.
+    if (user) void supabase.from("cart_items").delete().eq("user_id", user.id).then();
+  }, [user]);
 
+  const available = lines.filter((l) => l.status === "ok");
   const count = lines.reduce((sum, l) => sum + l.quantity, 0);
-  const subtotal = lines.reduce((sum, l) => sum + l.product.price_kes * l.quantity, 0);
+  const subtotal = available.reduce((sum, l) => sum + l.product.price_kes * l.quantity, 0);
+  const hasUnavailable = available.length !== lines.length;
 
   return (
     <CartContext.Provider
-      value={{ lines, count, subtotal, isOpen, setOpen, addItem, updateQty, removeItem, clearCart }}
+      value={{
+        lines,
+        count,
+        subtotal,
+        hasUnavailable,
+        isOpen,
+        setOpen,
+        addItem,
+        updateQty,
+        removeItem,
+        clearCart,
+      }}
     >
       {children}
     </CartContext.Provider>

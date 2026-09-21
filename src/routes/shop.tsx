@@ -1,10 +1,11 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { productsQueryOptions } from "@/lib/products";
 import { CATEGORIES } from "@/lib/types";
 import { formatKES } from "@/lib/format";
+import { seo } from "@/lib/site";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,58 +20,99 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface ShopSearch {
-  q?: string;
-  category?: string;
-  sale?: string;
-}
-
-export const Route = createFileRoute("/shop")({
-  validateSearch: (search: Record<string, unknown>): ShopSearch => ({
-    q: typeof search.q === "string" ? search.q : undefined,
-    category: typeof search.category === "string" ? search.category : undefined,
-    sale: typeof search.sale === "string" ? search.sale : undefined,
-  }),
-  head: () => ({
-    meta: [
-      { title: "Shop All Gadgets — OffGridIt" },
-      {
-        name: "description",
-        content:
-          "Browse phones, laptops, tablets, audio, wearables and accessories. Filter by category, brand and price. Genuine tech with fast Kenya delivery.",
-      },
-    ],
-  }),
-  component: Shop,
-});
-
 const SORTS = [
   { value: "featured", label: "Featured" },
   { value: "newest", label: "Newest" },
   { value: "price-asc", label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },
   { value: "rating", label: "Top rated" },
-];
+] as const;
 
-const MAX_PRICE = 300000;
+type SortValue = (typeof SORTS)[number]["value"];
+
+// Every filter lives in the URL so a filtered view can be shared or bookmarked,
+// e.g. /shop?category=Phones,Audio&brand=Apple&max=150000&sort=price-asc
+export interface ShopSearch {
+  q?: string;
+  /** Comma-separated categories. */
+  category?: string;
+  /** Comma-separated brands. */
+  brand?: string;
+  max?: number;
+  sort?: SortValue;
+  /** Deals only. Old links used sale=1, which still works. */
+  sale?: boolean;
+}
+
+const text = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : undefined);
+const splitList = (v?: string) => (v ? v.split(",").filter(Boolean) : []);
+const joinList = (values: string[]) => (values.length ? values.join(",") : undefined);
+
+export const Route = createFileRoute("/shop")({
+  validateSearch: (search: Record<string, unknown>): ShopSearch => {
+    const max = Number(search.max);
+    const sort = SORTS.find((s) => s.value === search.sort)?.value;
+    return {
+      q: text(search.q),
+      category: text(search.category),
+      brand: text(search.brand),
+      max: Number.isFinite(max) && max > 0 ? max : undefined,
+      sort: sort === "featured" ? undefined : sort,
+      sale: [true, "true", 1, "1"].includes(search.sale as never) ? true : undefined,
+    };
+  },
+  head: ({ match }) => {
+    // A single-category view gets its own title and canonical URL; any other
+    // filter combination points search engines at the main shop page.
+    const cats = splitList(match.search.category);
+    const category = cats.length === 1 ? CATEGORIES.find((c) => c === cats[0]) : undefined;
+    return category
+      ? seo({
+          title: `${category} in Kenya — OffGridIt`,
+          description: `Shop genuine ${category.toLowerCase()} at OffGridIt. Warranty included, pay with M-Pesa, pickup or delivery arranged by call or WhatsApp.`,
+          path: `/shop?category=${encodeURIComponent(category)}`,
+        })
+      : seo({
+          title: "Shop All Gadgets — OffGridIt",
+          description:
+            "Browse phones, laptops, tablets, audio, wearables and accessories. Filter by category, brand and price. Genuine tech in Kenya, pay with M-Pesa.",
+          path: "/shop",
+        });
+  },
+  component: Shop,
+});
+
+const PRICE_STEP = 1000;
 
 function Shop() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const { data: products = [], isPending } = useQuery(productsQueryOptions);
 
-  const [selectedCats, setSelectedCats] = useState<string[]>(
-    search.category ? [search.category] : [],
-  );
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [maxPrice, setMaxPrice] = useState(MAX_PRICE);
-  const [sort, setSort] = useState("featured");
-  const [filtersOpen, setFiltersOpen] = useState(false);
-
   const query = search.q ?? "";
-  const onlySale = search.sale === "1";
+  const selectedCats = useMemo(() => splitList(search.category), [search.category]);
+  const selectedBrands = useMemo(() => splitList(search.brand), [search.brand]);
+  const sort: SortValue = search.sort ?? "featured";
+  const onlySale = search.sale === true;
+
+  // The slider tops out at the most expensive product, so nothing is hidden by default.
+  const priceCeiling = useMemo(() => {
+    const top = Math.max(0, ...products.map((p) => p.price_kes));
+    return Math.max(PRICE_STEP, Math.ceil(top / PRICE_STEP) * PRICE_STEP);
+  }, [products]);
+  const maxPrice = Math.min(search.max ?? priceCeiling, priceCeiling);
+  // Local while dragging; written to the URL when the thumb is released.
+  const [dragPrice, setDragPrice] = useState<number | null>(null);
+  const shownPrice = dragPrice ?? maxPrice;
+
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [searchInput, setSearchInput] = useState(query);
-  const searchRef = useRef<HTMLInputElement>(null);
+  useEffect(() => setSearchInput(query), [query]);
+
+  // Filter changes replace the history entry, so Back leaves the shop instead of
+  // stepping through every checkbox click.
+  const setSearch = (patch: Partial<ShopSearch>) =>
+    navigate({ search: (s) => ({ ...s, ...patch }), replace: true, resetScroll: false });
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,7 +138,10 @@ function Shop() {
     if (selectedCats.length) list = list.filter((p) => selectedCats.includes(p.category));
     if (selectedBrands.length) list = list.filter((p) => selectedBrands.includes(p.brand));
     if (onlySale) list = list.filter((p) => p.is_on_sale);
-    list = list.filter((p) => p.price_kes <= maxPrice);
+    if (search.max) {
+      const max = search.max;
+      list = list.filter((p) => p.price_kes <= max);
+    }
 
     switch (sort) {
       case "price-asc":
@@ -115,18 +160,22 @@ function Shop() {
         list.sort((a, b) => Number(b.is_featured) - Number(a.is_featured));
     }
     return list;
-  }, [products, query, selectedCats, selectedBrands, onlySale, maxPrice, sort]);
+  }, [products, query, selectedCats, selectedBrands, onlySale, search.max, sort]);
 
-  const toggle = (arr: string[], set: (v: string[]) => void, value: string) =>
-    set(arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value]);
+  const toggleIn = (values: string[], value: string) =>
+    joinList(values.includes(value) ? values.filter((v) => v !== value) : [...values, value]);
+
+  const hasFilters = Boolean(
+    query || selectedCats.length || selectedBrands.length || search.max || onlySale,
+  );
 
   const clearAll = () => {
-    setSelectedCats([]);
-    setSelectedBrands([]);
-    setMaxPrice(MAX_PRICE);
     setSearchInput("");
-    navigate({ search: {} as ShopSearch });
+    setDragPrice(null);
+    navigate({ search: (s) => ({ sort: s.sort }) });
   };
+
+  const heading = selectedCats.length === 1 ? selectedCats[0] : onlySale ? "Deals" : "All products";
 
   const FilterPanel = (
     <div className="space-y-8">
@@ -137,7 +186,7 @@ function Shop() {
             <label key={c} className="flex cursor-pointer items-center gap-2.5 text-sm">
               <Checkbox
                 checked={selectedCats.includes(c)}
-                onCheckedChange={() => toggle(selectedCats, setSelectedCats, c)}
+                onCheckedChange={() => setSearch({ category: toggleIn(selectedCats, c) })}
               />
               {c}
             </label>
@@ -152,7 +201,7 @@ function Shop() {
             <label key={b} className="flex cursor-pointer items-center gap-2.5 text-sm">
               <Checkbox
                 checked={selectedBrands.includes(b)}
-                onCheckedChange={() => toggle(selectedBrands, setSelectedBrands, b)}
+                onCheckedChange={() => setSearch({ brand: toggleIn(selectedBrands, b) })}
               />
               {b}
             </label>
@@ -163,16 +212,29 @@ function Shop() {
       <div>
         <h3 className="mb-3 text-sm font-semibold">Max price</h3>
         <Slider
-          value={[maxPrice]}
-          min={1000}
-          max={MAX_PRICE}
-          step={1000}
-          onValueChange={(v) => setMaxPrice(v[0])}
+          value={[shownPrice]}
+          min={PRICE_STEP}
+          max={priceCeiling}
+          step={PRICE_STEP}
+          onValueChange={(v) => setDragPrice(v[0])}
+          onValueCommit={(v) => {
+            setDragPrice(null);
+            setSearch({ max: v[0] >= priceCeiling ? undefined : v[0] });
+          }}
         />
-        <p className="mt-3 text-sm text-muted-foreground">Up to {formatKES(maxPrice)}</p>
+        <p className="mt-3 text-sm text-muted-foreground">
+          {shownPrice >= priceCeiling ? "Any price" : `Up to ${formatKES(shownPrice)}`}
+        </p>
       </div>
 
-      <Button variant="outline" className="w-full" onClick={clearAll}>
+      {onlySale && (
+        <label className="flex cursor-pointer items-center gap-2.5 text-sm">
+          <Checkbox checked onCheckedChange={() => setSearch({ sale: undefined })} />
+          On sale only
+        </label>
+      )}
+
+      <Button variant="outline" className="w-full" onClick={clearAll} disabled={!hasFilters}>
         Clear filters
       </Button>
     </div>
@@ -191,7 +253,6 @@ function Shop() {
             <form onSubmit={submitSearch} className="relative mt-4 max-w-md">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                ref={searchRef}
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Refine your search..."
@@ -207,8 +268,10 @@ function Shop() {
           </>
         ) : (
           <>
-            <h1 className="text-3xl font-bold sm:text-4xl">All products</h1>
-            <p className="mt-2 text-muted-foreground">{filtered.length} products</p>
+            <h1 className="text-3xl font-bold sm:text-4xl">{heading}</h1>
+            <p className="mt-2 text-muted-foreground">
+              {filtered.length} product{filtered.length !== 1 ? "s" : ""}
+            </p>
           </>
         )}
       </div>
@@ -228,8 +291,13 @@ function Shop() {
               <SlidersHorizontal className="h-4 w-4" /> Filters
             </Button>
             <div className="ml-auto w-44">
-              <Select value={sort} onValueChange={setSort}>
-                <SelectTrigger>
+              <Select
+                value={sort}
+                onValueChange={(v) =>
+                  setSearch({ sort: v === "featured" ? undefined : (v as SortValue) })
+                }
+              >
+                <SelectTrigger aria-label="Sort products">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -286,7 +354,7 @@ function Shop() {
                       key={cat}
                       onClick={() => {
                         setSearchInput("");
-                        navigate({ search: { category: cat } });
+                        navigate({ search: { category: cat, sort: search.sort } });
                       }}
                       className="rounded-full border border-border bg-secondary/50 px-3 py-1.5 text-sm font-medium hover:border-primary/50 hover:bg-primary/10 hover:text-primary transition-colors"
                     >

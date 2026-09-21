@@ -1,16 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { seo } from "@/lib/site";
 
 export const Route = createFileRoute("/refund")({
-  head: () => ({
-    meta: [
-      { title: "Refund & Returns Policy — OffGridIt" },
-      {
-        name: "description",
-        content:
-          "OffGridIt returns, exchanges and refund policy. Items can be returned within 7 days of delivery.",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "Refund & Returns Policy — OffGridIt",
+      description:
+        "OffGridIt returns, exchanges and refund policy. Items can be returned within 7 days of receiving them.",
+      path: "/refund",
+    }),
   component: RefundPage,
 });
 

@@ -3,9 +3,10 @@ import { GitCompare } from "lucide-react";
 import { useCompare } from "@/lib/compare-context";
 import { formatKES } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { NO_INDEX } from "@/lib/site";
 
 export const Route = createFileRoute("/compare")({
-  head: () => ({ meta: [{ title: "Compare Products — OffGridIt" }] }),
+  head: () => ({ meta: [{ title: "Compare Products — OffGridIt" }, NO_INDEX] }),
   component: ComparePage,
 });
 

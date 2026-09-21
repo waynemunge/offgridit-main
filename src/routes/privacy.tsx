@@ -1,16 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { seo } from "@/lib/site";
 
 export const Route = createFileRoute("/privacy")({
-  head: () => ({
-    meta: [
-      { title: "Privacy Policy — OffGridIt" },
-      {
-        name: "description",
-        content:
-          "How OffGridIt collects, uses and protects your personal data under the Kenya Data Protection Act 2019.",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "Privacy Policy — OffGridIt",
+      description:
+        "How OffGridIt collects, uses and protects your personal data under the Kenya Data Protection Act 2019.",
+      path: "/privacy",
+    }),
   component: PrivacyPage,
 });
 

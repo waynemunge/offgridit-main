@@ -5,18 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { seo } from "@/lib/site";
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: [
-      { title: "Contact OffGridIt — We're Here to Help" },
-      {
-        name: "description",
-        content:
-          "Get in touch with OffGridIt. Questions about products, orders or warranty? Reach our Kenya-based support team by phone, email or message.",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "Contact OffGridIt — We're Here to Help",
+      description:
+        "Get in touch with OffGridIt. Questions about products, orders or warranty? Reach our Kenya-based support team by phone, email or message.",
+      path: "/contact",
+    }),
   component: Contact,
 });
 

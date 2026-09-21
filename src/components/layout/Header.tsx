@@ -36,7 +36,7 @@ export function Header() {
 
   const onSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate({ to: "/shop", search: { q: query || undefined } as any });
+    navigate({ to: "/shop", search: { q: query || undefined } });
     setMobileOpen(false);
   };
 

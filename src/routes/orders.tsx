@@ -8,9 +8,10 @@ import { useAuthModal } from "@/lib/auth-modal";
 import { formatKES } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { NO_INDEX } from "@/lib/site";
 
 export const Route = createFileRoute("/orders")({
-  head: () => ({ meta: [{ title: "My Orders — OffGridIt" }] }),
+  head: () => ({ meta: [{ title: "My Orders — OffGridIt" }, NO_INDEX] }),
   component: OrdersPage,
 });
 

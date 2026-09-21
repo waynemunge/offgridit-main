@@ -3,9 +3,10 @@ import { Heart } from "lucide-react";
 import { useWishlist } from "@/lib/wishlist-context";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
+import { NO_INDEX } from "@/lib/site";
 
 export const Route = createFileRoute("/wishlist")({
-  head: () => ({ meta: [{ title: "Wishlist — OffGridIt" }] }),
+  head: () => ({ meta: [{ title: "Wishlist — OffGridIt" }, NO_INDEX] }),
   component: WishlistPage,
 });
 

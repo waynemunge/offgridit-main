@@ -7,18 +7,15 @@ import { useCart } from "@/lib/cart-context";
 import { validateDiscountCode } from "@/lib/api/discount.functions";
 import { placeOrder } from "@/lib/api/orders.functions";
 import { formatKES } from "@/lib/format";
+import { FULFILMENT_NOTE, NO_INDEX, WHATSAPP_URL } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({ meta: [{ title: "Checkout — OffGridIt" }] }),
+  head: () => ({ meta: [{ title: "Checkout — OffGridIt" }, NO_INDEX] }),
   component: Checkout,
 });
-
-const WHATSAPP_URL = "https://wa.me/254702699933";
-const FULFILMENT_NOTE =
-  "Pickup or delivery is arranged with you by call or WhatsApp after you order — nothing extra is charged here.";
 
 type AppliedCode = {
   id: string;
@@ -31,7 +28,7 @@ type PlacedOrder = { orderId: string; total: number; method: "mpesa" | "card" };
 
 function Checkout() {
   const qc = useQueryClient();
-  const { lines, subtotal, clearCart } = useCart();
+  const { lines, subtotal, clearCart, hasUnavailable } = useCart();
   const [method, setMethod] = useState<"mpesa" | "card">("mpesa");
   const [placing, setPlacing] = useState(false);
   const [placed, setPlaced] = useState<PlacedOrder | null>(null);
@@ -138,6 +135,20 @@ function Checkout() {
         <h1 className="text-3xl font-bold">Your cart is empty</h1>
         <Button variant="hero" className="mt-6" asChild>
           <Link to="/shop">Browse products</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  if (hasUnavailable) {
+    return (
+      <div className="container-px mx-auto max-w-2xl py-24 text-center">
+        <h1 className="text-3xl font-bold">Some items just sold out</h1>
+        <p className="mt-3 text-muted-foreground">
+          Remove them from your cart to continue with the rest of your order.
+        </p>
+        <Button variant="hero" className="mt-6" asChild>
+          <Link to="/cart">Review cart</Link>
         </Button>
       </div>
     );
