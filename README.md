@@ -142,45 +142,22 @@ App runs at `http://localhost:3000`.
 
 ## Database Setup
 
-Run the migrations in `/supabase/migrations/` in order via the Supabase SQL editor. Then run the following additional migrations manually:
+There are two Supabase projects:
 
-```sql
--- Product variants support
-ALTER TABLE products ADD COLUMN IF NOT EXISTS variants JSONB NOT NULL DEFAULT '[]';
+| Project | Used by | Data |
+|---|---|---|
+| **Live** (`ylvvnbpzjmkjcekzfucu`) | Production — `main` → www.offgridit.store | Real orders and stock |
+| **Test** | Every Vercel preview (any other branch) | Test data only — safe to break |
 
--- Admin order notes
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS admin_notes TEXT;
+The whole schema lives in `supabase/migrations/`. To set up an empty project (e.g. a new test database):
 
--- Discount codes
-CREATE TABLE IF NOT EXISTS discount_codes (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  code TEXT NOT NULL UNIQUE,
-  type TEXT NOT NULL CHECK (type IN ('percentage', 'fixed')),
-  value NUMERIC NOT NULL,
-  min_order_kes NUMERIC NOT NULL DEFAULT 0,
-  max_uses INTEGER,
-  uses INTEGER NOT NULL DEFAULT 0,
-  expires_at TIMESTAMPTZ,
-  is_active BOOLEAN NOT NULL DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-
--- Flash sale countdown
-ALTER TABLE products ADD COLUMN IF NOT EXISTS sale_ends_at TIMESTAMPTZ;
-
--- Back-in-stock notifications
-CREATE TABLE IF NOT EXISTS restock_notifications (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-  email TEXT NOT NULL,
-  notified_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  UNIQUE(product_id, email)
-);
-ALTER TABLE restock_notifications ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "anyone_can_subscribe" ON restock_notifications FOR INSERT WITH CHECK (true);
-CREATE POLICY "service_role_restock" ON restock_notifications USING (true);
+```bash
+npm run db:bundle   # writes supabase/.bundle/setup.sql
 ```
+
+Paste `supabase/.bundle/setup.sql` into that project's SQL Editor and run it once.
+
+**Changing the schema:** add a new file to `supabase/migrations/`, run it on the **test** project, check the preview, then run it on the **live** project **before** merging the pull request.
 
 ---
 
@@ -188,19 +165,17 @@ CREATE POLICY "service_role_restock" ON restock_notifications USING (true);
 
 The app is pre-configured for Vercel (`nitro: { preset: "vercel" }` in `vite.config.ts`).
 
-```bash
-# Deploy via GitHub — Vercel auto-deploys on every push to main
-git push origin main
-```
+- Every branch gets a **preview** deployment, connected to the **test** database.
+- `main` is protected: changes arrive through a pull request once the **Lint, type check, build** check passes, and Vercel deploys them to production.
 
-Add all environment variables in **Vercel → Project → Settings → Environment Variables**.
+Environment variables are in **Vercel → Project → Settings → Environment Variables**. The Supabase variables have separate values for **Production** (live project) and **Preview** (test project).
 
 ---
 
 ## Admin Access
 
-1. Sign up or sign in on the live site
-2. In Supabase → Table Editor → `profiles`, set `is_admin = true` for your user row
+1. Sign up or sign in on the site (live, or a preview for the test database — each database has its own accounts)
+2. In that Supabase project → Table Editor → `profiles`, set `is_admin = true` for your user row
 3. Visit `/admin`
 
 ---

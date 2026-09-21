@@ -38,3 +38,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Generated SQL bundle (npm run db:bundle)
+supabase/.bundle
