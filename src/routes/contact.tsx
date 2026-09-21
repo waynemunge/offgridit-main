@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { seo } from "@/lib/site";
+import { PHONE_DISPLAY, seo } from "@/lib/site";
 
 export const Route = createFileRoute("/contact")({
   head: () =>
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/contact")({
 });
 
 const INFO = [
-  { icon: Phone, label: "Call us", value: "+254 700 000 000" },
+  { icon: Phone, label: "Call or WhatsApp", value: PHONE_DISPLAY },
   { icon: Mail, label: "Email", value: "hello@offgridit.com" },
   { icon: MapPin, label: "Visit", value: "Nairobi, Kenya" },
   { icon: Clock, label: "Hours", value: "Mon–Sat, 9am–6pm" },
