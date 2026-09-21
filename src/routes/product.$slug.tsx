@@ -147,7 +147,7 @@ function ProductDetail() {
   useEffect(() => {
     trackProduct(product);
     setRecentItems(getRecentlyViewed(product.id));
-  }, [product.id]);
+  }, [product]);
 
   const discount = discountPercent(product.price_kes, product.compare_at_price_kes);
   const inStock = product.stock > 0;
@@ -493,7 +493,7 @@ function ReviewsSection({ productId }: { productId: string }) {
   const { data: reviews = [], isLoading } = useQuery({
     queryKey: ["reviews", productId],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("reviews")
         .select("id, user_id, reviewer_name, rating, comment, created_at")
         .eq("product_id", productId)

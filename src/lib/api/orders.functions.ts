@@ -90,8 +90,7 @@ export const placeOrder = createServerFn({ method: "POST" })
     const userId = await getOptionalUserId();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: row, error } = await (supabaseAdmin as any).rpc("place_order", {
+    const { data: row, error } = await supabaseAdmin.rpc("place_order", {
       p_user_id: userId,
       p_payment_method: data.paymentMethod,
       p_full_name: data.fullName,
@@ -111,7 +110,8 @@ export const placeOrder = createServerFn({ method: "POST" })
       throw new Error(friendlyError(error.message ?? ""));
     }
 
-    const order = row as PlaceOrderRow;
+    // place_order() returns jsonb; its shape is defined in the migration.
+    const order = row as unknown as PlaceOrderRow;
     const emailData = {
       orderId: order.order_id,
       customerName: data.fullName,

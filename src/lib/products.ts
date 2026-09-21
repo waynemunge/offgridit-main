@@ -1,16 +1,21 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Product } from "./types";
+import type { Tables } from "@/integrations/supabase/types";
+import type { Product, ProductVariantGroup } from "./types";
 
-function normalize(row: any): Product {
+// numeric columns arrive as strings; JSON columns need a shape check.
+function normalize(row: Tables<"products">): Product {
   return {
     ...row,
     price_kes: Number(row.price_kes),
     compare_at_price_kes:
       row.compare_at_price_kes != null ? Number(row.compare_at_price_kes) : null,
     rating: Number(row.rating),
-    images: Array.isArray(row.images) ? row.images : [],
-    specs: row.specs && typeof row.specs === "object" ? row.specs : {},
-    variants: Array.isArray(row.variants) ? row.variants : [],
+    images: Array.isArray(row.images) ? (row.images as string[]) : [],
+    specs:
+      row.specs && typeof row.specs === "object" && !Array.isArray(row.specs)
+        ? (row.specs as Record<string, string>)
+        : {},
+    variants: Array.isArray(row.variants) ? (row.variants as unknown as ProductVariantGroup[]) : [],
   };
 }
 

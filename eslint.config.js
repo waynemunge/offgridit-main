@@ -44,9 +44,13 @@ export default tseslint.config(
       ],
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
-      // Warn for now: the generated Supabase types lag the database, so a few casts remain.
-      "@typescript-eslint/no-explicit-any": "warn",
     },
+  },
+  {
+    // shadcn/ui components export their variants, and context files export a
+    // provider with its hook — both standard patterns that only affect hot reload.
+    files: ["src/components/ui/**/*.tsx", "src/lib/*-context.tsx", "src/lib/auth-modal.tsx"],
+    rules: { "react-refresh/only-export-components": "off" },
   },
   eslintPluginPrettier,
 );

@@ -25,7 +25,7 @@ import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recha
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
-import { CATEGORIES } from "@/lib/types";
+import { CATEGORIES, type Product } from "@/lib/types";
 import { formatKES } from "@/lib/format";
 import { NO_INDEX } from "@/lib/site";
 import { productsQueryOptions } from "@/lib/products";
@@ -939,7 +939,7 @@ function ProductsPanel() {
     setAddUrl("");
     setSheetOpen(true);
   };
-  const openEdit = (p: any) => {
+  const openEdit = (p: Product) => {
     setAddUrl("");
     setForm({
       id: p.id,
@@ -955,7 +955,7 @@ function ProductsPanel() {
       is_on_sale: p.is_on_sale,
       sale_ends_at: p.sale_ends_at ? new Date(p.sale_ends_at).toISOString().slice(0, 16) : "",
       images: p.images ?? [],
-      specs_raw: Object.entries(p.specs as Record<string, string>)
+      specs_raw: Object.entries(p.specs)
         .map(([k, v]) => `${k}: ${v}`)
         .join("\n"),
     });
@@ -1537,8 +1537,8 @@ function CodesPanel() {
       setForm(EMPTY_CODE);
       setShowForm(false);
       toast.success("Code created");
-    } catch (err: any) {
-      toast.error(err?.message ?? "Failed to create code");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create code");
     } finally {
       setCreating(false);
     }
@@ -1581,7 +1581,7 @@ function CodesPanel() {
               <Label>Type</Label>
               <Select
                 value={form.type}
-                onValueChange={(v) => setForm((f) => ({ ...f, type: v as any }))}
+                onValueChange={(v) => setForm((f) => ({ ...f, type: v as "percentage" | "fixed" }))}
               >
                 <SelectTrigger>
                   <SelectValue />
