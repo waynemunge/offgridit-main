@@ -13,22 +13,59 @@ async function requireAdmin(userId: string) {
   return supabaseAdmin;
 }
 
+export const ORDER_STATUSES = [
+  "pending",
+  "paid",
+  "processing",
+  "shipped",
+  "delivered",
+  "cancelled",
+] as const;
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+
+/**
+ * Changes an order's status through set_order_status(), which also returns the
+ * items to stock when an order is cancelled and takes them again if it's un-cancelled.
+ */
 export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
     z.object({
       orderId: z.string().uuid(),
-      status: z.enum(["pending", "paid", "processing", "shipped", "delivered", "cancelled"]),
+      status: z.enum(ORDER_STATUSES),
     }),
   )
   .handler(async ({ data, context }) => {
     const db = await requireAdmin(context.userId);
-    const { error } = await db
-      .from("orders")
-      .update({ status: data.status })
-      .eq("id", data.orderId);
-    if (error) throw error;
-    return { success: true };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: result, error } = await (db as any).rpc("set_order_status", {
+      p_order_id: data.orderId,
+      p_status: data.status,
+    });
+    if (error) {
+      console.error("set_order_status failed:", error);
+      const message: string = error.message ?? "";
+      if (message.startsWith("OUT_OF_STOCK")) {
+        const name = message.split(/:\s*/)[1] ?? "an item";
+        throw new Error(`Not enough stock of ${name} to reopen this order.`);
+      }
+      throw new Error("Couldn't update the order status.");
+    }
+    const stock = (result as { stock: "none" | "restocked" | "reserved" }).stock;
+
+    // Items returned to stock may make a sold-out product available again.
+    if (stock === "restocked") {
+      const { data: items } = await db
+        .from("order_items")
+        .select("product_id")
+        .eq("order_id", data.orderId);
+      const ids = [...new Set((items ?? []).map((i) => i.product_id).filter(Boolean))] as string[];
+      if (ids.length) {
+        const { sendRestockEmails } = await import("../email.server");
+        await sendRestockEmails(ids).catch((err) => console.error("Restock emails failed:", err));
+      }
+    }
+    return { stock };
   });
 
 const productInputSchema = z.object({
